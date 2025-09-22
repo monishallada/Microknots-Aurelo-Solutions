@@ -1,305 +1,237 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="bg-white">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aurelo Data Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <style>
-        /* Minimal custom CSS to implement the 'card' look without @apply */
-        .card {
-            border-radius: 0.5rem; /* rounded-lg */
-            border: 1px solid #e2e8f0; /* border border-slate-200 */
-            padding: 1rem; /* p-4 */
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
-            transition: all 0.2s ease-in-out;
-        }
-
-        /* Micro-interaction: gentle hover lift */
-        .hover-rise:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            color: #000000; /* Body text: black */
-            background-color: #ffffff; /* Background: white */
-        }
-
-        /* Custom style for the compact, muted table header text */
-        .table-header-text {
-            font-size: 0.75rem; /* text-xs */
-            color: #64748b; /* text-slate-500 */
-            text-transform: uppercase;
-            font-weight: 600; /* font-semibold */
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Aurelo Data Dashboard</title>
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,500,600,700,800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; color: #000; }
+    .card { border-radius: 0.75rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 4px 0 #0001; padding: 1rem; background: #fff; transition: box-shadow 0.2s, transform 0.15s; }
+    .card:hover { box-shadow: 0 2px 12px 0 #0002; transform: translateY(-2px); }
+    .hover-rise { transition: box-shadow 0.2s, transform 0.15s; }
+    .hover-rise:hover { box-shadow: 0 4px 16px 0 #0003; transform: translateY(-4px);}
+    .table th { text-transform: uppercase; font-size: .75rem; color: #64748b; background: #fff; }
+    .table td, .table th { padding: .5rem .75rem; border-bottom: 1px solid #e2e8f0; }
+    .scroll-x { overflow-x: auto; }
+  </style>
 </head>
-<body class="bg-white">
+<body class="bg-white text-black">
+  <!-- Sticky Header -->
+  <header class="sticky top-0 z-50 bg-white border-b border-slate-200">
+    <nav class="max-w-7xl mx-auto flex justify-between items-center px-4 py-2">
+      <div class="text-lg font-bold tracking-tight">Aurelo Data Dashboard</div>
+      <div class="flex gap-4 text-base font-medium">
+        <a href="#page1" class="hover:underline">Overview</a>
+        <a href="#page2" class="hover:underline">Sales</a>
+        <a href="#page3" class="hover:underline">Products</a>
+        <a href="#page4" class="hover:underline">Stores</a>
+      </div>
+    </nav>
+  </header>
 
-    <header class="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <h1 class="text-lg font-bold">Aurelo Data Dashboard</h1>
-
-            <nav class="space-x-4 text-sm font-semibold text-slate-700">
-                <a href="#page1" class="hover:text-blue-600 transition">Overview</a>
-                <a href="#page2" class="hover:text-blue-600 transition">Sales</a>
-                <a href="#page3" class="hover:text-blue-600 transition">Products</a>
-                <a href="#page4" class="hover:text-blue-600 transition">Stores</a>
-            </nav>
+  <main class="max-w-7xl mx-auto px-4 py-6 flex flex-col gap-12">
+    <!-- Overview: KPIs & Charts -->
+    <section id="page1">
+      <h2 class="text-lg font-bold mb-4">Overview</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="card">
+          <div class="text-xs text-slate-500 mb-1">Revenue</div>
+          <div class="text-xl font-semibold">$120,000</div>
         </div>
-    </header>
-
-    <main class="max-w-7xl mx-auto px-4 py-6 space-y-8">
-        <section id="page1" class="space-y-6 pt-2">
-            <h2 class="text-xl font-bold">Overview</h2>
-
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="card hover-rise flex flex-col justify-between">
-                    <p class="text-xs text-slate-500 uppercase tracking-wider">Revenue</p>
-                    <p class="text-xl font-semibold mt-1" id="kpi-revenue">$120k</p>
-                </div>
-                <div class="card hover-rise flex flex-col justify-between">
-                    <p class="text-xs text-slate-500 uppercase tracking-wider">Orders</p>
-                    <p class="text-xl font-semibold mt-1" id="kpi-orders">3,200</p>
-                </div>
-                <div class="card hover-rise flex flex-col justify-between">
-                    <p class="text-xs text-slate-500 uppercase tracking-wider">Avg Basket</p>
-                    <p class="text-xl font-semibold mt-1" id="kpi-avg-basket">$38</p>
-                </div>
-                <div class="card hover-rise flex flex-col justify-between">
-                    <p class="text-xs text-slate-500 uppercase tracking-wider">Margin</p>
-                    <p class="text-xl font-semibold mt-1" id="kpi-margin">24%</p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="card hover-rise">
-                    <h3 class="text-lg font-semibold mb-2">Revenue Over Time</h3>
-                    <canvas id="revenueChart" height="80"></canvas>
-                </div>
-                <div class="card hover-rise">
-                    <h3 class="text-lg font-semibold mb-2">Category Mix</h3>
-                    <div class="h-40 flex items-center justify-center">
-                        <canvas id="categoryChart" class="max-h-full max-w-full"></canvas>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        ---
-
-        <section id="page2" class="space-y-6 pt-2">
-            <h2 class="text-xl font-bold">Sales Performance</h2>
-            <div class="card">
-                <table class="min-w-full divide-y divide-slate-200">
-                    <thead class="bg-white">
-                        <tr>
-                            <th class="table-header-text px-3 py-2 text-left">Date</th>
-                            <th class="table-header-text px-3 py-2 text-right">Orders</th>
-                            <th class="table-header-text px-3 py-2 text-right">Revenue</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 text-sm">
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-3 py-2">2025-09-01</td>
-                            <td class="px-3 py-2 text-right">120</td>
-                            <td class="px-3 py-2 text-right">$4,500</td>
-                        </tr>
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-3 py-2">2025-09-02</td>
-                            <td class="px-3 py-2 text-right">135</td>
-                            <td class="px-3 py-2 text-right">$5,100</td>
-                        </tr>
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-3 py-2">2025-09-03</td>
-                            <td class="px-3 py-2 text-right">110</td>
-                            <td class="px-3 py-2 text-right">$4,250</td>
-                        </tr>
-                        </tbody>
-                </table>
-            </div>
-        </section>
-
-        ---
-
-        <section id="page3" class="space-y-6 pt-2">
-            <h2 class="text-xl font-bold">Top Products</h2>
-            <div class="card overflow-x-auto">
-                <table class="min-w-full divide-y divide-slate-200">
-                    <thead class="bg-white">
-                        <tr>
-                            <th class="table-header-text px-3 py-2 text-left">Product</th>
-                            <th class="table-header-text px-3 py-2 text-right">Units</th>
-                            <th class="table-header-text px-3 py-2 text-right">Revenue</th>
-                            <th class="table-header-text px-3 py-2 text-right">Margin</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 text-sm">
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-3 py-2 font-semibold">Organic Whole Milk (Gallon)</td>
-                            <td class="px-3 py-2 text-right">450</td>
-                            <td class="px-3 py-2 text-right">$2,250</td>
-                            <td class="px-3 py-2 text-right">35%</td>
-                        </tr>
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-3 py-2 font-semibold">Artisan Sourdough Loaf</td>
-                            <td class="px-3 py-2 text-right">320</td>
-                            <td class="px-3 py-2 text-right">$1,920</td>
-                            <td class="px-3 py-2 text-right">28%</td>
-                        </tr>
-                        </tbody>
-                </table>
-            </div>
-        </section>
-
-        ---
-
-        <section id="page4" class="space-y-6 pt-2">
-            <h2 class="text-xl font-bold">Store Performance</h2>
-            <div class="card overflow-x-auto">
-                <table class="min-w-full divide-y divide-slate-200">
-                    <thead class="bg-white">
-                        <tr>
-                            <th class="table-header-text px-3 py-2 text-left">Store</th>
-                            <th class="table-header-text px-3 py-2 text-left">City</th>
-                            <th class="table-header-text px-3 py-2 text-right">Revenue</th>
-                            <th class="table-header-text px-3 py-2 text-right">Orders</th>
-                            <th class="table-header-text px-3 py-2 text-right">Margin</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 text-sm">
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-3 py-2 font-semibold">North Ridge</td>
-                            <td class="px-3 py-2">Raleigh</td>
-                            <td class="px-3 py-2 text-right">$65,000</td>
-                            <td class="px-3 py-2 text-right">1,700</td>
-                            <td class="px-3 py-2 text-right">25%</td>
-                        </tr>
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-3 py-2 font-semibold">Downtown</td>
-                            <td class="px-3 py-2">Charlotte</td>
-                            <td class="px-3 py-2 text-right">$55,000</td>
-                            <td class="px-3 py-2 text-right">1,500</td>
-                            <td class="px-3 py-2 text-right">22%</td>
-                        </tr>
-                        </tbody>
-                </table>
-            </div>
-        </section>
-    </main>
-
-    <footer class="mt-10 border-t border-slate-200 py-4">
-        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
-            &copy; <span id="currentYear"></span> Aurelo Data. All rights reserved.
+        <div class="card">
+          <div class="text-xs text-slate-500 mb-1">Orders</div>
+          <div class="text-xl font-semibold">3,200</div>
         </div>
-    </footer>
+        <div class="card">
+          <div class="text-xs text-slate-500 mb-1">Avg Basket</div>
+          <div class="text-xl font-semibold">$38</div>
+        </div>
+        <div class="card">
+          <div class="text-xs text-slate-500 mb-1">Margin</div>
+          <div class="text-xl font-semibold">24%</div>
+        </div>
+      </div>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="card">
+          <div class="font-semibold text-slate-500 mb-2">Revenue Over Time</div>
+          <canvas id="lineChart" height="80"></canvas>
+        </div>
+        <div class="card">
+          <div class="font-semibold text-slate-500 mb-2">Category Mix</div>
+          <canvas id="doughnutChart" height="80"></canvas>
+        </div>
+      </div>
+    </section>
 
-    <script>
-        // Set current year in the footer
-        document.getElementById('currentYear').textContent = new Date().getFullYear();
+    <!-- Sales Table -->
+    <section id="page2">
+      <h2 class="text-lg font-bold mb-4">Sales Performance</h2>
+      <div class="card scroll-x">
+        <table class="table w-full text-sm">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Orders</th>
+              <th>Revenue</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>2025-09-01</td>
+              <td>120</td>
+              <td>$4,500</td>
+            </tr>
+            <tr>
+              <td>2025-09-02</td>
+              <td>132</td>
+              <td>$4,900</td>
+            </tr>
+            <tr>
+              <td>2025-09-03</td>
+              <td>128</td>
+              <td>$4,700</td>
+            </tr>
+            <tr>
+              <td>2025-09-04</td>
+              <td>145</td>
+              <td>$5,200</td>
+            </tr>
+            <tr>
+              <td>2025-09-05</td>
+              <td>136</td>
+              <td>$4,950</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
 
-        // 1. Revenue Over Time (Line Chart)
-        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-        const revenueChart = new Chart(revenueCtx, {
-            type: 'line',
-            data: {
-                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-                datasets: [{
-                    label: 'Revenue ($)',
-                    data: [18000, 24000, 20000, 28000, 30000], // Demo data
-                    borderColor: 'rgb(59, 130, 246)', // Tailwind blue-500
-                    borderWidth: 2,
-                    pointRadius: 3,
-                    tension: 0.4,
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)', // Light fill
-                    fill: true,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false, // Allows height="80" to control size
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false,
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: '#e2e8f0' // slate-200
-                        },
-                        ticks: {
-                            color: '#64748b' // slate-500
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            color: '#64748b'
-                        }
-                    }
-                }
-            }
-        });
+    <!-- Products Table -->
+    <section id="page3">
+      <h2 class="text-lg font-bold mb-4">Top Products</h2>
+      <div class="card scroll-x">
+        <table class="table w-full text-sm">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Units</th>
+              <th>Revenue</th>
+              <th>Margin</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Product A</td>
+              <td>540</td>
+              <td>$12,500</td>
+              <td>28%</td>
+            </tr>
+            <tr>
+              <td>Product B</td>
+              <td>480</td>
+              <td>$10,800</td>
+              <td>21%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
 
-        // 2. Category Mix (Doughnut Chart)
-        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
-        const categoryChart = new Chart(categoryCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Produce', 'Dairy', 'Bakery'],
-                datasets: [{
-                    data: [40, 30, 30], // 40/30/30 split demo
-                    backgroundColor: [
-                        'rgb(34, 197, 94)', // Tailwind emerald-500 (Produce)
-                        'rgb(99, 102, 241)', // Tailwind violet-500 (Dairy)
-                        'rgb(234, 88, 12)', // Tailwind orange-600 (Bakery)
-                    ],
-                    hoverOffset: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right', // Place legend on the right
-                        labels: {
-                            boxWidth: 12,
-                            padding: 15,
-                            color: '#000000'
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.parsed !== null) {
-                                    label += context.parsed + '%';
-                                }
-                                return label;
-                            }
-                        }
-                    }
-                },
-                cutout: '60%', // Makes it a doughnut
-            }
-        });
-    </script>
+    <!-- Stores Table -->
+    <section id="page4">
+      <h2 class="text-lg font-bold mb-4">Store Performance</h2>
+      <div class="card scroll-x">
+        <table class="table w-full text-sm">
+          <thead>
+            <tr>
+              <th>Store</th>
+              <th>City</th>
+              <th>Revenue</th>
+              <th>Orders</th>
+              <th>Margin</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>North Ridge</td>
+              <td>Raleigh</td>
+              <td>$35,000</td>
+              <td>920</td>
+              <td>23%</td>
+            </tr>
+            <tr>
+              <td>Downtown</td>
+              <td>Charlotte</td>
+              <td>$41,000</td>
+              <td>1,100</td>
+              <td>27%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+  <!-- Footer -->
+  <footer class="w-full text-center py-3 text-xs text-slate-500 border-t border-slate-200">
+    &copy; <span id="year"></span> Aurelo Data. All rights reserved.
+  </footer>
 
+  <script>
+    // Inject current year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Line chart demo data: Revenue Over Time (Mon–Fri)
+    new Chart(document.getElementById('lineChart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+        datasets: [{
+          label: 'Revenue',
+          data: [4500, 4900, 4700, 5200, 4950],
+          borderColor: '#334155',
+          backgroundColor: 'rgba(51,65,85,0.12)',
+          tension: 0.4,
+          fill: true,
+          pointRadius: 3,
+          pointBackgroundColor: '#334155'
+        }]
+      },
+      options: {
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: { display: true, grid: { display: false }},
+          y: { display: false }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+
+    // Doughnut chart demo data: Category Mix
+    new Chart(document.getElementById('doughnutChart').getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Produce', 'Dairy', 'Bakery'],
+        datasets: [{
+          data: [40, 30, 30],
+          backgroundColor: ['#64748b', '#e2e8f0', '#334155'],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        plugins: {
+          legend: { display: true, position: 'bottom' }
+        },
+        cutout: '62%',
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  </script>
 </body>
 </html>
