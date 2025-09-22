@@ -1,918 +1,305 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" class="scroll-smooth">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Aurelo Data • Store Dashboard</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-  <style>
-    :root {
-      --bg: #ffffff;         /* White background */
-      --panel: #ffffff;      /* Card background */
-      --panel-2: #f6f7fb;    /* Page background */
-      --text: #0f172a;       /* Black-ish text */
-      --muted: #475569;      /* Muted text */
-      --brand: #111827;      /* Neutral brand tone */
-      --brand-2: #0b0f1a;    
-      --ok: #16a34a;         /* Green */
-      --warn: #b45309;       /* Amber */
-      --err: #dc2626;        /* Red */
-      --shadow: 0 10px 25px rgba(2,6,23,.06);
-      --ring: rgba(17,24,39,.08);
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurelo Data Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        /* Minimal custom CSS to implement the 'card' look without @apply */
+        .card {
+            border-radius: 0.5rem; /* rounded-lg */
+            border: 1px solid #e2e8f0; /* border border-slate-200 */
+            padding: 1rem; /* p-4 */
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+            transition: all 0.2s ease-in-out;
+        }
 
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body { margin: 0; background: var(--panel-2); color: var(--text); font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; line-height: 1.35; }
+        /* Micro-interaction: gentle hover lift */
+        .hover-rise:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
 
-    /* Layout */
-    .app { display: grid; grid-template-columns: 280px 1fr; grid-template-rows: 64px 1fr; grid-template-areas: "sidebar topbar" "sidebar main"; height: 100vh; overflow: hidden; }
-    .topbar { grid-area: topbar; display: flex; align-items: center; gap: 12px; background: var(--panel); padding: 0 16px; border-bottom: 1px solid rgba(2,6,23,.06); position: sticky; top: 0; z-index: 50; }
-    .sidebar { grid-area: sidebar; background: var(--panel); border-right: 1px solid rgba(2,6,23,.06); display: flex; flex-direction: column; padding: 16px; gap: 12px; }
-    .main { grid-area: main; overflow: auto; padding: 20px; background: var(--panel-2); }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #000000; /* Body text: black */
+            background-color: #ffffff; /* Background: white */
+        }
 
-    /* Sidebar */
-    .brand { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; border: 1px solid rgba(2,6,23,.06); background: #fff; }
-    .brand .logo { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 8px; background: #111827; color: #fff; font-weight: 800; letter-spacing: .5px; }
-    .search { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 10px; background: #fff; border: 1px solid rgba(2,6,23,.08); box-shadow: 0 1px 0 #fff, 0 0 0 4px transparent; }
-    .search:focus-within { box-shadow: 0 1px 0 #fff, 0 0 0 4px var(--ring); }
-    .search input { flex: 1; background: transparent; border: 0; outline: none; color: var(--text); font-size: 14px; }
-    .side-section h5 { margin: 16px 8px 8px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .08em; font-size: 11px; }
-    .navlist { display: grid; gap: 6px; }
-    .navitem { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; cursor: pointer; color: var(--text); border: 1px solid rgba(2,6,23,.06); background: #fff; }
-    .navitem.active, .navitem:hover { outline: 3px solid var(--ring); }
-    .muted { color: var(--muted); }
-    .footer { margin-top: auto; font-size: 12px; color: var(--muted); display:flex; gap:10px; align-items:center; }
-    .chip { font-size: 11px; padding: 4px 8px; border-radius: 999px; background: #f1f5f9; color: #111827; border: 1px solid rgba(2,6,23,.06); }
-
-    /* Topbar */
-    .topbar .btn { padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(2,6,23,.08); background: #fff; color: var(--text); cursor: pointer; box-shadow: var(--shadow); }
-    .topbar .btn:hover { filter: brightness(1.02); }
-    .btn.btn-primary { background: #111827; color: #fff; }
-    .spacer { flex: 1; }
-
-    /* Cards & grids */
-    .grid { display: grid; gap: 16px; }
-    .grid.kpis { grid-template-columns: repeat(4, minmax(220px, 1fr)); }
-    .grid.two { grid-template-columns: 1.25fr 1fr; }
-
-    .card { background: var(--panel); border: 1px solid rgba(2,6,23,.06); border-radius: 16px; box-shadow: var(--shadow); }
-    .card .head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid rgba(2,6,23,.06); }
-    .card .body { padding: 16px; }
-    .h2 { font-size: 20px; font-weight: 700; }
-    .kpi { display: grid; gap: 8px; }
-    .kpi .value { font-size: 24px; font-weight: 800; letter-spacing: -.02em; }
-    .trend { font-size: 12px; font-weight: 600; }
-    .up { color: var(--ok); }
-    .down { color: var(--err); }
-
-    /* Table */
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th, td { padding: 10px 12px; border-bottom: 1px solid rgba(2,6,23,.06); text-align: left; }
-    thead th { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
-    tbody tr:hover { background: #f8fafc; }
-    .tag { padding: 4px 8px; border-radius: 999px; font-size: 11px; border: 1px solid rgba(2,6,23,.1); background:#f8fafc; }
-    .right { text-align: right; }
-
-    /* Controls */
-    .controls { display:flex; flex-wrap: wrap; gap: 8px; }
-    .input, select { padding: 10px 12px; border-radius: 10px; border:1px solid rgba(2,6,23,.12); background: #fff; color: var(--text); }
-
-    /* Responsive */
-    @media (max-width: 1200px) { .grid.kpis { grid-template-columns: repeat(2, minmax(200px, 1fr)); } .grid.two { grid-template-columns: 1fr; } }
-    @media (max-width: 900px) {
-      .app { grid-template-columns: 1fr; grid-template-areas: "topbar" "main"; }
-      .sidebar { position: fixed; inset: 64px auto 0 0; width: 280px; transform: translateX(-100%); transition: transform .25s ease; z-index: 60; }
-      .sidebar.open { transform: translateX(0); }
-    }
-  </style>
+        /* Custom style for the compact, muted table header text */
+        .table-header-text {
+            font-size: 0.75rem; /* text-xs */
+            color: #64748b; /* text-slate-500 */
+            text-transform: uppercase;
+            font-weight: 600; /* font-semibold */
+        }
+    </style>
 </head>
-<body>
-  <div class="app">
-    <!-- SIDEBAR -->
-    <aside class="sidebar" id="sidebar">
-      <div class="brand">
-        <div class="logo">A</div>
-        <div>
-          <div style="font-weight:800; letter-spacing:.02em">Aurelo Data</div>
-          <div class="muted" style="font-size:12px">Store Intelligence Dashboard</div>
+<body class="bg-white">
+
+    <header class="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 class="text-lg font-bold">Aurelo Data Dashboard</h1>
+
+            <nav class="space-x-4 text-sm font-semibold text-slate-700">
+                <a href="#page1" class="hover:text-blue-600 transition">Overview</a>
+                <a href="#page2" class="hover:text-blue-600 transition">Sales</a>
+                <a href="#page3" class="hover:text-blue-600 transition">Products</a>
+                <a href="#page4" class="hover:text-blue-600 transition">Stores</a>
+            </nav>
         </div>
-      </div>
-
-      <div class="search">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="muted"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input id="globalSearch" placeholder="Search across tables…" />
-      </div>
-
-      <div class="side-section">
-        <h5>Navigation</h5>
-        <div class="navlist" id="navlist">
-          <div class="navitem active" data-target="#overview"><span>🏠</span> Overview</div>
-          <div class="navitem" data-target="#sales"><span>📈</span> Sales & Trends</div>
-          <div class="navitem" data-target="#inventory"><span>📦</span> Inventory</div>
-          <div class="navitem" data-target="#customers"><span>👥</span> Customers</div>
-          <div class="navitem" data-target="#pricing"><span>💲</span> Pricing & Competitors</div>
-          <div class="navitem" data-target="#recommend"><span>✨</span> Recommendations</div>
-          <div class="navitem" data-target="#ops"><span>🛠️</span> Ops & Alerts</div>
-          <div class="navitem" data-target="#exports"><span>📤</span> Export</div>
-        </div>
-      </div>
-
-      <div class="side-section">
-        <h5>Filters</h5>
-        <div class="grid" style="grid-template-columns:1fr 1fr">
-          <select id="regionSelect">
-            <option value="all">All Regions</option>
-            <option>East</option>
-            <option>West</option>
-            <option>Central</option>
-          </select>
-          <select id="channelSelect">
-            <option value="all">All Channels</option>
-            <option>In‑Store</option>
-            <option>Online</option>
-            <option>Wholesale</option>
-          </select>
-          <input class="input" type="date" id="fromDate" />
-          <input class="input" type="date" id="toDate" />
-          <button class="btn btn-primary" id="applyFilters">Apply</button>
-        </div>
-      </div>
-
-      <div class="footer">
-        <span class="chip">v1.1</span>
-        <span class="muted">© Aurelo Data</span>
-      </div>
-    </aside>
-
-    <!-- TOPBAR -->
-    <header class="topbar">
-      <button class="btn" id="menuBtn">☰</button>
-      <div class="h2">Dashboard</div>
-      <div class="spacer"></div>
-      <button class="btn" id="refreshBtn">Refresh</button>
-      <button class="btn btn-primary" id="newReportBtn">Generate Report</button>
     </header>
 
-    <!-- MAIN -->
-    <main class="main">
-      <!-- OVERVIEW -->
-      <section id="overview" class="view">
-        <div class="grid kpis">
-          <div class="card kpi">
-            <div class="head"><div>Revenue (MTD)</div><div class="tag" id="kpiScope">All Stores</div></div>
-            <div class="body">
-              <div class="value" id="kpiRevenue">$—</div>
-              <div class="trend" id="kpiRevenueTrend">—</div>
-            </div>
-          </div>
-          <div class="card kpi">
-            <div class="head"><div>Units Sold</div><div class="tag">MTD</div></div>
-            <div class="body">
-              <div class="value" id="kpiUnits">—</div>
-              <div class="trend" id="kpiUnitsTrend">—</div>
-            </div>
-          </div>
-          <div class="card kpi">
-            <div class="head"><div>Avg Order Value</div><div class="tag">Blended</div></div>
-            <div class="body">
-              <div class="value" id="kpiAOV">—</div>
-              <div class="trend" id="kpiAOVTrend">—</div>
-            </div>
-          </div>
-          <div class="card kpi">
-            <div class="head"><div>Gross Margin</div><div class="tag">Normalized</div></div>
-            <div class="body">
-              <div class="value" id="kpiGM">—</div>
-              <div class="trend" id="kpiGMTrend">—</div>
-            </div>
-          </div>
-        </div>
+    <main class="max-w-7xl mx-auto px-4 py-6 space-y-8">
+        <section id="page1" class="space-y-6 pt-2">
+            <h2 class="text-xl font-bold">Overview</h2>
 
-        <div class="grid two" style="margin-top:16px;">
-          <div class="card">
-            <div class="head"><div class="h2">Revenue Trend</div>
-              <div class="controls">
-                <select id="trendSpan">
-                  <option value="30">Last 30 days</option>
-                  <option value="90" selected>Last 90 days</option>
-                  <option value="365">YTD</option>
-                </select>
-              </div></div>
-            <div class="body"><canvas id="revTrend" height="110"></canvas></div>
-          </div>
-          <div class="card">
-            <div class="head"><div class="h2">Sales by Category</div></div>
-            <div class="body"><canvas id="catBar" height="110"></canvas></div>
-          </div>
-        </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="card hover-rise flex flex-col justify-between">
+                    <p class="text-xs text-slate-500 uppercase tracking-wider">Revenue</p>
+                    <p class="text-xl font-semibold mt-1" id="kpi-revenue">$120k</p>
+                </div>
+                <div class="card hover-rise flex flex-col justify-between">
+                    <p class="text-xs text-slate-500 uppercase tracking-wider">Orders</p>
+                    <p class="text-xl font-semibold mt-1" id="kpi-orders">3,200</p>
+                </div>
+                <div class="card hover-rise flex flex-col justify-between">
+                    <p class="text-xs text-slate-500 uppercase tracking-wider">Avg Basket</p>
+                    <p class="text-xl font-semibold mt-1" id="kpi-avg-basket">$38</p>
+                </div>
+                <div class="card hover-rise flex flex-col justify-between">
+                    <p class="text-xs text-slate-500 uppercase tracking-wider">Margin</p>
+                    <p class="text-xl font-semibold mt-1" id="kpi-margin">24%</p>
+                </div>
+            </div>
 
-        <div class="grid two" style="margin-top:16px;">
-          <div class="card">
-            <div class="head"><div class="h2">Top Products</div>
-              <div class="controls">
-                <input class="input" id="prodSearch" placeholder="Search products…"/>
-                <button class="btn" id="exportTop">Export CSV</button>
-              </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="card hover-rise">
+                    <h3 class="text-lg font-semibold mb-2">Revenue Over Time</h3>
+                    <canvas id="revenueChart" height="80"></canvas>
+                </div>
+                <div class="card hover-rise">
+                    <h3 class="text-lg font-semibold mb-2">Category Mix</h3>
+                    <div class="h-40 flex items-center justify-center">
+                        <canvas id="categoryChart" class="max-h-full max-w-full"></canvas>
+                    </div>
+                </div>
             </div>
-            <div class="body">
-              <table id="topProducts">
-                <thead>
-                  <tr>
-                    <th data-sort="name">Product</th>
-                    <th data-sort="sku">SKU</th>
-                    <th>Category</th>
-                    <th class="right" data-sort="revenue">Revenue</th>
-                    <th class="right" data-sort="units">Units</th>
-                    <th class="right" data-sort="margin">Margin %</th>
-                  </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
-            </div>
-          </div>
-          <div class="card">
-            <div class="head"><div class="h2">Store Performance</div>
-              <div class="controls">
-                <button class="btn" id="rankRevenue">Rank by Revenue</button>
-                <button class="btn" id="rankNps">Rank by NPS</button>
-              </div>
-            </div>
-            <div class="body">
-              <table id="storePerf">
-                <thead>
-                  <tr>
-                    <th>Store</th>
-                    <th>Region</th>
-                    <th class="right">Revenue</th>
-                    <th class="right">YoY</th>
-                    <th class="right">NPS</th>
-                  </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- SALES -->
-      <section id="sales" class="view" hidden>
-        <div class="grid two">
-          <div class="card">
-            <div class="head"><div class="h2">Channel Mix</div></div>
-            <div class="body"><canvas id="channelPie" height="120"></canvas></div>
-          </div>
-          <div class="card">
-            <div class="head"><div class="h2">Hourly Heatmap</div></div>
-            <div class="body"><canvas id="heatmap" height="120"></canvas>
-              <div class="muted" style="font-size:12px">Peak traffic 12–2pm local.</div>
-            </div>
-          </div>
-        </div>
-      </section>
+        ---
 
-      <!-- INVENTORY -->
-      <section id="inventory" class="view" hidden>
-        <div class="grid two">
-          <div class="card">
-            <div class="head"><div class="h2">Low Stock Alerts</div><button class="btn btn-primary" id="reorderBtn">Create Reorder PO</button></div>
-            <div class="body">
-              <table id="lowStock">
-                <thead>
-                  <tr>
-                    <th>Product</th>
-                    <th>SKU</th>
-                    <th class="right">On Hand</th>
-                    <th class="right">Days Cover</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
+        <section id="page2" class="space-y-6 pt-2">
+            <h2 class="text-xl font-bold">Sales Performance</h2>
+            <div class="card">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-white">
+                        <tr>
+                            <th class="table-header-text px-3 py-2 text-left">Date</th>
+                            <th class="table-header-text px-3 py-2 text-right">Orders</th>
+                            <th class="table-header-text px-3 py-2 text-right">Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-sm">
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-3 py-2">2025-09-01</td>
+                            <td class="px-3 py-2 text-right">120</td>
+                            <td class="px-3 py-2 text-right">$4,500</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-3 py-2">2025-09-02</td>
+                            <td class="px-3 py-2 text-right">135</td>
+                            <td class="px-3 py-2 text-right">$5,100</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-3 py-2">2025-09-03</td>
+                            <td class="px-3 py-2 text-right">110</td>
+                            <td class="px-3 py-2 text-right">$4,250</td>
+                        </tr>
+                        </tbody>
+                </table>
             </div>
-          </div>
-          <div class="card">
-            <div class="head"><div class="h2">A/B Pricing Test</div></div>
-            <div class="body"><canvas id="abLine" height="120"></canvas></div>
-          </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- CUSTOMERS -->
-      <section id="customers" class="view" hidden>
-        <div class="grid two">
-          <div class="card">
-            <div class="head"><div class="h2">Customer Segments</div></div>
-            <div class="body"><canvas id="segmentDonut" height="120"></canvas></div>
-          </div>
-          <div class="card">
-            <div class="head"><div class="h2">Cohort Retention (90‑day)</div></div>
-            <div class="body">
-              <table id="cohorts">
-                <thead><tr><th>Cohort</th><th class="right">Week 1</th><th class="right">Week 4</th><th class="right">Week 8</th><th class="right">Week 12</th></tr></thead>
-                <tbody></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </section>
+        ---
 
-      <!-- PRICING -->
-      <section id="pricing" class="view" hidden>
-        <div class="grid two">
-          <div class="card">
-            <div class="head"><div class="h2">Competitor Pricing</div>
-              <div class="controls"><button class="btn" id="syncCompetitors">Sync</button></div>
+        <section id="page3" class="space-y-6 pt-2">
+            <h2 class="text-xl font-bold">Top Products</h2>
+            <div class="card overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-white">
+                        <tr>
+                            <th class="table-header-text px-3 py-2 text-left">Product</th>
+                            <th class="table-header-text px-3 py-2 text-right">Units</th>
+                            <th class="table-header-text px-3 py-2 text-right">Revenue</th>
+                            <th class="table-header-text px-3 py-2 text-right">Margin</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-sm">
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-3 py-2 font-semibold">Organic Whole Milk (Gallon)</td>
+                            <td class="px-3 py-2 text-right">450</td>
+                            <td class="px-3 py-2 text-right">$2,250</td>
+                            <td class="px-3 py-2 text-right">35%</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-3 py-2 font-semibold">Artisan Sourdough Loaf</td>
+                            <td class="px-3 py-2 text-right">320</td>
+                            <td class="px-3 py-2 text-right">$1,920</td>
+                            <td class="px-3 py-2 text-right">28%</td>
+                        </tr>
+                        </tbody>
+                </table>
             </div>
-            <div class="body">
-              <table id="competitorPricing">
-                <thead><tr><th>Product</th><th>Our Price</th><th>Competitor</th><th>Competitor Price</th><th class="right">Delta</th></tr></thead>
-                <tbody></tbody>
-              </table>
-            </div>
-          </div>
-          <div class="card">
-            <div class="head"><div class="h2">Elasticity Sandbox</div></div>
-            <div class="body">
-              <div class="controls" style="margin-bottom:10px">
-                <label style="font-size:12px">Price ($): <input id="elasPrice" class="input" type="number" value="20" min="1" step="0.5" style="width:120px"></label>
-                <label style="font-size:12px">Elasticity (E): <input id="elasE" class="input" type="number" value="-1.4" step="0.1" style="width:120px"></label>
-                <button class="btn" id="runElas">Run</button>
-              </div>
-              <div id="elasResult" class="muted" style="font-size:12px">Expected demand change: —</div>
-            </div>
-          </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- RECOMMENDATIONS -->
-      <section id="recommend" class="view" hidden>
-        <div class="grid two">
-          <div class="card">
-            <div class="head"><div class="h2">Bundle Recommendations</div></div>
-            <div class="body">
-              <table id="bundles">
-                <thead><tr><th>Bundle</th><th>Lift</th><th>Support</th><th class="right">Est. Uplift</th></tr></thead>
-                <tbody></tbody>
-              </table>
-            </div>
-          </div>
-          <div class="card">
-            <div class="head"><div class="h2">Promo Calendar</div></div>
-            <div class="body">
-              <table id="promos">
-                <thead><tr><th>Date</th><th>Campaign</th><th>Channel</th><th class="right">Target Uplift</th></tr></thead>
-                <tbody></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </section>
+        ---
 
-      <!-- OPS & ALERTS -->
-      <section id="ops" class="view" hidden>
-        <div class="grid two">
-          <div class="card">
-            <div class="head"><div class="h2">Live Alerts</div></div>
-            <div class="body">
-              <table id="alerts">
-                <thead><tr><th>Time</th><th>Type</th><th>Message</th><th>Status</th></tr></thead>
-                <tbody></tbody>
-              </table>
+        <section id="page4" class="space-y-6 pt-2">
+            <h2 class="text-xl font-bold">Store Performance</h2>
+            <div class="card overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-white">
+                        <tr>
+                            <th class="table-header-text px-3 py-2 text-left">Store</th>
+                            <th class="table-header-text px-3 py-2 text-left">City</th>
+                            <th class="table-header-text px-3 py-2 text-right">Revenue</th>
+                            <th class="table-header-text px-3 py-2 text-right">Orders</th>
+                            <th class="table-header-text px-3 py-2 text-right">Margin</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-sm">
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-3 py-2 font-semibold">North Ridge</td>
+                            <td class="px-3 py-2">Raleigh</td>
+                            <td class="px-3 py-2 text-right">$65,000</td>
+                            <td class="px-3 py-2 text-right">1,700</td>
+                            <td class="px-3 py-2 text-right">25%</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-3 py-2 font-semibold">Downtown</td>
+                            <td class="px-3 py-2">Charlotte</td>
+                            <td class="px-3 py-2 text-right">$55,000</td>
+                            <td class="px-3 py-2 text-right">1,500</td>
+                            <td class="px-3 py-2 text-right">22%</td>
+                        </tr>
+                        </tbody>
+                </table>
             </div>
-          </div>
-          <div class="card">
-            <div class="head"><div class="h2">Ops Checklist</div></div>
-            <div class="body">
-              <ul id="checklist" style="margin:0; padding-left:18px; line-height:1.9">
-                <li><label><input type="checkbox"/> Reconcile previous day sales</label></li>
-                <li><label><input type="checkbox"/> Verify deposits & chargebacks</label></li>
-                <li><label><input type="checkbox"/> Review low stock SKUs</label></li>
-                <li><label><input type="checkbox"/> Update promo signage</label></li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- EXPORTS -->
-      <section id="exports" class="view" hidden>
-        <div class="card">
-          <div class="head"><div class="h2">Export Center</div></div>
-          <div class="body">
-            <div class="controls" style="margin-bottom:12px">
-              <select id="exportWhat"><option value="topProducts">Top Products</option><option value="storePerf">Store Performance</option><option value="lowStock">Low Stock</option><option value="competitorPricing">Competitor Pricing</option><option value="alerts">Alerts</option></select>
-              <button class="btn btn-primary" id="exportBtn">Export CSV</button>
-            </div>
-            <div class="muted" style="font-size:12px">Exports are generated from current on‑screen data and reflect active filters.</div>
-          </div>
-        </div>
-      </section>
+        </section>
     </main>
-  </div>
 
-  <!-- Modal -->
-  <dialog id="modal" style="border:0; border-radius:16px; padding:0; width:min(720px, 92vw); background: var(--panel); color: var(--text); box-shadow: var(--shadow);">
-    <div class="card" style="margin:0; border:0; box-shadow:none">
-      <div class="head"><div class="h2" id="modalTitle">Report</div><button class="btn" id="modalClose">Close</button></div>
-      <div class="body" id="modalBody"></div>
-    </div>
-  </dialog>
+    <footer class="mt-10 border-t border-slate-200 py-4">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
+            &copy; <span id="currentYear"></span> Aurelo Data. All rights reserved.
+        </div>
+    </footer>
 
-  <script>
-    // ---------- STATE & DATA ----------
-    const state = {
-      from: null,
-      to: null,
-      region: 'all',
-      channel: 'all',
-      spanDays: 90
-    };
+    <script>
+        // Set current year in the footer
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
 
-    // Realistic catalog & stores
-    const catalog = [
-      {name:'Aurelo Energy Drink — Citrus 12oz', sku:'AE-C12', cat:'Beverage', margin:0.41},
-      {name:'Aurelo Energy Drink — Berry 12oz', sku:'AE-B12', cat:'Beverage', margin:0.40},
-      {name:'Aurelo Protein Bar — Cocoa 6pk', sku:'AP-B06', cat:'Snacks', margin:0.36},
-      {name:'Aurelo Protein Bar — Peanut 6pk', sku:'AP-P06', cat:'Snacks', margin:0.35},
-      {name:'Aurelo Sparkling Water — Lime 8pk', sku:'AS-L08', cat:'Beverage', margin:0.33},
-      {name:'Aurelo Smart Bottle 24oz', sku:'AB-24', cat:'Accessories', margin:0.48},
-      {name:'Aurelo Electrolyte Mix — Berry 20ct', sku:'AM-B20', cat:'Supplements', margin:0.39},
-      {name:'Aurelo Creatine 300g', sku:'AC-300', cat:'Supplements', margin:0.45}
-    ];
-
-    const stores = [
-      {id:'RDU01', store:'Raleigh 01', region:'East', nps:72},
-      {id:'CLT02', store:'Charlotte 02', region:'East', nps:69},
-      {id:'AUS07', store:'Austin 07', region:'Central', nps:75},
-      {id:'SJC03', store:'San Jose 03', region:'West', nps:71},
-      {id:'SEA05', store:'Seattle 05', region:'West', nps:73},
-      {id:'CHI04', store:'Chicago 04', region:'Central', nps:68}
-    ];
-
-    // Daily sales for last 120 days with channel split
-    const channels = ['In‑Store','Online','Wholesale'];
-    const dailySales = [];
-    (function seedSales(){
-      const today = new Date();
-      for(let i=120; i>=0; i--){
-        const date = new Date(today); date.setDate(today.getDate()-i);
-        stores.forEach(s => {
-          const base = 1200 + (Math.sin(i/9)*120) + (s.region==='East'?60: s.region==='West'?40:50);
-          const instore = Math.max(0, base * (0.55 + Math.sin(i/5)*0.05));
-          const online  = Math.max(0, base * (0.35 + Math.cos(i/7)*0.04));
-          const whole   = Math.max(0, base * 0.10);
-          // units & AOV
-          const units = Math.round((instore+online+whole)/40);
-          const aov = 38 + (Math.sin(i/11)*2);
-          // product splits
-          const prod = Object.fromEntries(catalog.map(p=>[p.sku, Math.max(0, Math.round(units*(0.08+Math.random()*0.12)))]));
-          dailySales.push({date: date.toISOString().slice(0,10), store:s.id, region:s.region, revenue: instore+online+whole, units, aov, channel:{'In‑Store':instore,'Online':online,'Wholesale':whole}, products: prod});
+        // 1. Revenue Over Time (Line Chart)
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        const revenueChart = new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                datasets: [{
+                    label: 'Revenue ($)',
+                    data: [18000, 24000, 20000, 28000, 30000], // Demo data
+                    borderColor: 'rgb(59, 130, 246)', // Tailwind blue-500
+                    borderWidth: 2,
+                    pointRadius: 3,
+                    tension: 0.4,
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)', // Light fill
+                    fill: true,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, // Allows height="80" to control size
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#e2e8f0' // slate-200
+                        },
+                        ticks: {
+                            color: '#64748b' // slate-500
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#64748b'
+                        }
+                    }
+                }
+            }
         });
-      }
-    })();
 
-    // Inventory & external data
-    const lowStockData = [
-      {name:'Smart Bottle 24oz', sku:'AB-24', onhand: 28, days: 3, status:'Critical'},
-      {name:'Protein Bar — Cocoa 6pk', sku:'AP-B06', onhand: 140, days: 5, status:'Low'},
-      {name:'Electrolyte Mix — Berry 20ct', sku:'AM-B20', onhand: 80, days: 4, status:'Low'},
-    ];
-
-    const competitorPricing = [
-      {name:'Smart Bottle 24oz', ours: 29.99, comp:'HydraCo', compPrice: 31.49},
-      {name:'Protein Bar — Cocoa 6pk', ours: 9.99, comp:'Snacky', compPrice: 8.49},
-      {name:'Energy Drink — Citrus 12oz', ours: 2.49, comp:'VoltUp', compPrice: 2.79},
-      {name:'Sparkling Water — Lime 8pk', ours: 5.49, comp:'Fizz+Lime', compPrice: 5.19}
-    ];
-
-    const bundles = [
-      {bundle:'Energy Drink + Protein Bar', lift:1.22, support:0.18, uplift: 42000},
-      {bundle:'Smart Bottle + Electrolyte Mix', lift:1.17, support:0.11, uplift: 23000},
-      {bundle:'Creatine + Smart Bottle', lift:1.09, support:0.07, uplift: 9000}
-    ];
-
-    const promos = [
-      {date:'2025-09-25', campaign:'End‑of‑Quarter Boost', channel:'Omni', uplift:'+9%'},
-      {date:'2025-10-01', campaign:'Fall Fuel Week', channel:'Omni', uplift:'+12%'}
-    ];
-
-    const alertsData = [
-      {time:'09:14', type:'Stock', msg:'AB-24 below 30 units at Raleigh 01', status:'Open'},
-      {time:'10:02', type:'POS', msg:'Gateway retry at San Jose 03 (resolved)', status:'Resolved'},
-      {time:'11:35', type:'Chargeback', msg:'Dispute opened for order #81342', status:'Open'}
-    ];
-
-    // ---------- HELPERS ----------
-    const fmt = new Intl.NumberFormat(undefined, {maximumFractionDigits: 0});
-    const money = v => new Intl.NumberFormat(undefined,{style:'currency',currency:'USD'}).format(v);
-    const clampDate = (d) => new Date(d.toISOString().slice(0,10));
-
-    function rangeFilter(row){
-      const d = new Date(row.date);
-      if(state.from && d < state.from) return false;
-      if(state.to && d > state.to) return false;
-      if(state.region !== 'all' && row.region !== state.region) return false;
-      return true;
-    }
-
-    function aggregate(){
-      const rows = dailySales.filter(rangeFilter);
-      const byStore = new Map();
-      let totalRev=0, totalUnits=0, totalOrders=0, revSeries=[];
-      const catAgg = new Map();
-      const chanAgg = {'In‑Store':0,'Online':0,'Wholesale':0};
-
-      // build per-day totals for chart
-      const days = [...new Set(rows.map(r=>r.date))].sort();
-      days.forEach(day=>{
-        const dayRows = rows.filter(r=>r.date===day);
-        const rev = dayRows.reduce((s,r)=>s+r.revenue,0);
-        revSeries.push({date:day, revenue:rev});
-      });
-
-      rows.forEach(r=>{
-        totalRev += r.revenue; totalUnits += r.units; totalOrders += Math.max(1, Math.round(r.revenue / r.aov));
-        if(state.channel==='all'){ chanAgg['In‑Store']+=r.channel['In‑Store']; chanAgg['Online']+=r.channel['Online']; chanAgg['Wholesale']+=r.channel['Wholesale']; }
-        else { chanAgg[state.channel]+=r.channel[state.channel]; }
-        const st = stores.find(s=>s.id===r.store);
-        const cur = byStore.get(st.store) || {store:st.store, region:st.region, revenue:0, yoy: 6 + Math.random()*4, nps:st.nps};
-        cur.revenue += r.revenue; byStore.set(st.store, cur);
-        // Products → categories
-        Object.entries(r.products).forEach(([sku, units])=>{
-          const prod = catalog.find(p=>p.sku===sku); if(!prod) return;
-          const rev = units * 4.2 * (prod.cat==='Accessories'?7: prod.cat==='Supplements'?12: 1); // rough revenue weight
-          catAgg.set(prod.cat, (catAgg.get(prod.cat)||0) + rev);
+        // 2. Category Mix (Doughnut Chart)
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        const categoryChart = new Chart(categoryCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Produce', 'Dairy', 'Bakery'],
+                datasets: [{
+                    data: [40, 30, 30], // 40/30/30 split demo
+                    backgroundColor: [
+                        'rgb(34, 197, 94)', // Tailwind emerald-500 (Produce)
+                        'rgb(99, 102, 241)', // Tailwind violet-500 (Dairy)
+                        'rgb(234, 88, 12)', // Tailwind orange-600 (Bakery)
+                    ],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right', // Place legend on the right
+                        labels: {
+                            boxWidth: 12,
+                            padding: 15,
+                            color: '#000000'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed !== null) {
+                                    label += context.parsed + '%';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                cutout: '60%', // Makes it a doughnut
+            }
         });
-      });
+    </script>
 
-      // top products aggregate
-      const prodAgg = new Map();
-      rows.forEach(r=>{
-        Object.entries(r.products).forEach(([sku, units])=>{
-          const prod = catalog.find(p=>p.sku===sku); if(!prod) return;
-          const revenue = units * (prod.cat==='Accessories'?29.99: prod.cat==='Supplements'?24.99: prod.cat==='Snacks'?9.99:2.49);
-          const v = prodAgg.get(sku) || {name:prod.name, sku:sku, cat:prod.cat, units:0, revenue:0, margin:prod.margin};
-          v.units += units; v.revenue += revenue; prodAgg.set(sku, v);
-        });
-      });
-
-      return {
-        totalRev, totalUnits, totalOrders,
-        aov: totalOrders? totalRev/totalOrders : 0,
-        gm: 0.386, // static demo metric
-        revSeries, catAgg: Object.fromEntries(catAgg), chanAgg, stores: [...byStore.values()].sort((a,b)=>b.revenue-a.revenue),
-        products: [...prodAgg.values()].sort((a,b)=>b.revenue-a.revenue).slice(0,20)
-      };
-    }
-
-    function setDatesDefault(){
-      const today = clampDate(new Date());
-      const from = new Date(today); from.setDate(today.getDate()-29);
-      state.from = from; state.to = today; state.spanDays = 90;
-      document.getElementById('toDate').value = today.toISOString().slice(0,10);
-      document.getElementById('fromDate').value = from.toISOString().slice(0,10);
-    }
-
-    // ---------- RENDERERS ----------
-    let revChart, catChart, channelChart, heatChart, abChart, segChart;
-
-    function renderKpis(agg){
-      const prev = {...agg}; // naive previous for trend demo
-      document.getElementById('kpiScope').textContent = state.region==='all' ? 'All Stores' : state.region + ' Region';
-      document.getElementById('kpiRevenue').textContent = money(agg.totalRev);
-      document.getElementById('kpiUnits').textContent = fmt.format(agg.totalUnits);
-      document.getElementById('kpiAOV').textContent = money(agg.aov);
-      document.getElementById('kpiGM').textContent = (agg.gm*100).toFixed(1) + '%';
-      // simple mock trend comparisons
-      const revDelta = (Math.random()*4-2).toFixed(1);
-      const unitsDelta = (Math.random()*4-2).toFixed(1);
-      const aovDelta = (Math.random()*2-1).toFixed(1);
-      const gmDelta = (Math.random()*1-0.5).toFixed(1);
-      setTrend('kpiRevenueTrend', revDelta);
-      setTrend('kpiUnitsTrend', unitsDelta);
-      setTrend('kpiAOVTrend', aovDelta);
-      setTrend('kpiGMTrend', gmDelta, true);
-    }
-
-    function setTrend(id, delta, pts=false){
-      const el = document.getElementById(id);
-      const up = parseFloat(delta) >= 0; el.className = 'trend ' + (up? 'up':'down');
-      el.textContent = (up?'▲ ':'▼ ') + delta + (pts? ' pts':'') + ' vs prior';
-    }
-
-    function renderTrend(agg){
-      const ctx = document.getElementById('revTrend');
-      revChart?.destroy();
-      const labels = agg.revSeries.map(r=>r.date);
-      const data = agg.revSeries.map(r=>Math.round(r.revenue));
-      revChart = new Chart(ctx,{ type:'line', data:{ labels, datasets:[{ label:'Revenue', data, tension:.35, fill:true }]}, options:{ plugins:{legend:{display:false}}, scales:{ y:{ grid:{ color:'rgba(2,6,23,.08)'}}, x:{ grid:{ display:false}}}}});
-    }
-
-    function renderCategories(agg){
-      const ctx = document.getElementById('catBar');
-      catChart?.destroy();
-      const labels = Object.keys(agg.catAgg);
-      const data = Object.values(agg.catAgg).map(v=>Math.round(v));
-      catChart = new Chart(ctx,{ type:'bar', data:{ labels, datasets:[{ label:'Sales', data }]}, options:{ plugins:{legend:{display:false}}, scales:{ y:{ grid:{ color:'rgba(2,6,23,.08)'}}, x:{ grid:{ display:false}}}}});
-    }
-
-    function renderChannel(agg){
-      const ctx = document.getElementById('channelPie');
-      channelChart?.destroy();
-      const labels = Object.keys(agg.chanAgg);
-      const data = Object.values(agg.chanAgg).map(v=>Math.round(v));
-      channelChart = new Chart(ctx,{ type:'doughnut', data:{ labels, datasets:[{ data }]}, options:{ plugins:{legend:{position:'bottom'}}});
-    }
-
-    function renderHeatmap(){
-      const ctx = document.getElementById('heatmap');
-      heatChart?.destroy();
-      const hours = ['9a','10a','11a','12p','1p','2p','3p','4p','5p'];
-      const base = [10,12,18,26,28,24,20,18,14];
-      heatChart = new Chart(ctx,{ type:'bar', data:{ labels: hours, datasets:[{label:'Traffic', data: base}]}, options:{ plugins:{legend:{display:false}}, scales:{ y:{ display:false, grid:{display:false}}, x:{ grid:{display:false}}}}});
-    }
-
-    function renderAB(){
-      const ctx = document.getElementById('abLine');
-      abChart?.destroy();
-      abChart = new Chart(ctx,{ type:'line', data:{ labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], datasets:[{label:'Price A', data:[100,104,99,110,120,140,138]}, {label:'Price B', data:[98,96,101,105,112,125,130]}]}, options:{ plugins:{legend:{position:'bottom'}}, scales:{ y:{ grid:{ color:'rgba(2,6,23,.08)'}}, x:{ grid:{ display:false}}}}});
-    }
-
-    function renderSegments(){
-      const ctx = document.getElementById('segmentDonut');
-      segChart?.destroy();
-      segChart = new Chart(ctx,{ type:'doughnut', data:{ labels:['Loyal','Occasional','New'], datasets:[{ data:[44,38,18]}]}, options:{ plugins:{legend:{position:'bottom'}}});
-    }
-
-    function renderTopProducts(list){
-      const tb = document.querySelector('#topProducts tbody'); tb.innerHTML='';
-      list.forEach(r=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${r.name}</td>
-          <td class="muted">${r.sku}</td>
-          <td>${r.cat}</td>
-          <td class="right" data-sort="${r.revenue}">${money(r.revenue)}</td>
-          <td class="right" data-sort="${r.units}">${fmt.format(r.units)}</td>
-          <td class="right" data-sort="${r.margin}">${(r.margin*100).toFixed(1)}%</td>`;
-        tb.appendChild(tr);
-      });
-    }
-
-    function renderStores(list){
-      const tb = document.querySelector('#storePerf tbody'); tb.innerHTML='';
-      list.forEach(s=>{
-        const yoyClass = s.yoy>=0? 'up' : 'down';
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${s.store}</td>
-          <td><span class="tag">${s.region}</span></td>
-          <td class="right">${money(s.revenue)}</td>
-          <td class="right ${yoyClass}">${s.yoy>0? '▲':''}${s.yoy.toFixed(1)}%</td>
-          <td class="right">${s.nps}</td>`;
-        tb.appendChild(tr);
-      });
-    }
-
-    function renderLowStock(){
-      const tb = document.querySelector('#lowStock tbody'); tb.innerHTML='';
-      lowStockData.forEach(s=>{
-        const color = s.status==='Critical'? 'var(--err)' : 'var(--warn)';
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${s.name}</td>
-          <td class="muted">${s.sku}</td>
-          <td class="right">${s.onhand}</td>
-          <td class="right">${s.days}</td>
-          <td><span class="tag" style="color:${color}; border-color:${color}33">${s.status}</span></td>`;
-        tb.appendChild(tr);
-      });
-    }
-
-    function renderCompetitors(){
-      const tb = document.querySelector('#competitorPricing tbody'); tb.innerHTML='';
-      competitorPricing.forEach(r=>{
-        const delta = r.ours - r.compPrice;
-        const cls = delta<=0? 'up':'down';
-        const sign = delta>0? '+':'';
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${r.name}</td>
-          <td>${money(r.ours)}</td>
-          <td class="muted">${r.comp}</td>
-          <td>${money(r.compPrice)}</td>
-          <td class="right ${cls}">${sign}${delta.toFixed(2)}</td>`;
-        tb.appendChild(tr);
-      });
-    }
-
-    function renderBundles(){
-      const tb = document.querySelector('#bundles tbody'); tb.innerHTML='';
-      bundles.forEach(b=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${b.bundle}</td><td>${b.lift.toFixed(2)}×</td><td>${(b.support*100).toFixed(1)}%</td><td class="right">${money(b.uplift)}</td>`;
-        tb.appendChild(tr);
-      });
-    }
-
-    function renderPromos(){
-      const tb = document.querySelector('#promos tbody'); tb.innerHTML='';
-      promos.forEach(p=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${p.date}</td><td>${p.campaign}</td><td>${p.channel}</td><td class="right up">${p.uplift}</td>`;
-        tb.appendChild(tr);
-      });
-    }
-
-    function renderCohorts(){
-      const tb = document.querySelector('#cohorts tbody'); tb.innerHTML='';
-      const cohorts = [
-        {c:'Jul‑2025', w1:32, w4:21, w8:16, w12:12},
-        {c:'Aug‑2025', w1:34, w4:22, w8:17, w12:13},
-        {c:'Sep‑2025', w1:33, w4:23, w8:18, w12:'—'},
-      ];
-      cohorts.forEach(c=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${c.c}</td><td class="right">${c.w1}%</td><td class="right">${c.w4}%</td><td class="right">${c.w8}%</td><td class="right">${c.w12}%</td>`;
-        tb.appendChild(tr);
-      });
-    }
-
-    function renderAlerts(){
-      const tb = document.querySelector('#alerts tbody'); tb.innerHTML='';
-      alertsData.forEach(a=>{
-        const cls = a.status==='Open'? 'down' : 'up';
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${a.time}</td><td>${a.type}</td><td>${a.msg}</td><td class="${cls}">${a.status}</td>`;
-        tb.appendChild(tr);
-      });
-    }
-
-    // ---------- EXPORTS ----------
-    function toRowsFromTable(tableId){
-      const table = document.getElementById(tableId);
-      const headers = Array.from(table.querySelectorAll('thead th')).map(th=>th.textContent.trim());
-      const rows = Array.from(table.querySelectorAll('tbody tr')).map(tr=> Array.from(tr.children).map(td=> td.textContent.trim()));
-      return [headers, ...rows];
-    }
-
-    function downloadCSV(filename, rows){
-      const process = v => (v==null?'':String(v).replace(/"/g,'""'));
-      const csv = rows.map(r => r.map(c=>`"${process(c)}"`).join(',')).join('
-');
-      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-      const url = URL.createObjectURL(blob);
-      const link = Object.assign(document.createElement('a'), {href:url, download: filename});
-      document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url);
-    }
-
-    // ---------- MODAL ----------
-    const modal = document.getElementById('modal');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalBody = document.getElementById('modalBody');
-    const modalClose = document.getElementById('modalClose');
-    function showModal(title, html){ modalTitle.textContent = title; modalBody.innerHTML = html; modal.showModal(); }
-    modalClose.addEventListener('click', ()=> modal.close());
-
-    // ---------- WIRING ----------
-    // Sidebar toggle
-    document.getElementById('menuBtn').addEventListener('click', ()=> document.getElementById('sidebar').classList.toggle('open'));
-
-    // Router
-    document.getElementById('navlist').addEventListener('click', (e)=>{
-      const item = e.target.closest('.navitem'); if(!item) return;
-      document.querySelectorAll('.view').forEach(v=> v.hidden = true);
-      document.querySelector(item.dataset.target).hidden = false;
-      document.querySelectorAll('.navitem').forEach(n=> n.classList.remove('active'));
-      item.classList.add('active');
-      if (window.innerWidth < 900) document.getElementById('sidebar').classList.remove('open');
-    });
-
-    // Global search filters all visible tables
-    document.getElementById('globalSearch').addEventListener('input', (e)=>{
-      const q = e.target.value.toLowerCase();
-      document.querySelectorAll('section.view:not([hidden]) tbody').forEach(tb =>{
-        tb.querySelectorAll('tr').forEach(tr =>{
-          const show = tr.textContent.toLowerCase().includes(q);
-          tr.style.display = show? '' : 'none';
-        });
-      });
-    });
-
-    // Apply filters
-    document.getElementById('applyFilters').addEventListener('click', ()=>{
-      const region = document.getElementById('regionSelect').value; state.region = region;
-      const channel = document.getElementById('channelSelect').value; state.channel = channel;
-      const from = document.getElementById('fromDate').value; state.from = from? new Date(from) : null;
-      const to = document.getElementById('toDate').value; state.to = to? new Date(to) : null;
-      hydrate();
-      showModal('Filters Applied', `<div class="muted" style="font-size:12px">Region: <b>${region}</b> — Channel: <b>${channel}</b> — Range: <b>${from||'—'} to ${to||'—'}</b></div>`);
-    });
-
-    // Top product search
-    document.getElementById('prodSearch').addEventListener('input', ()=>{
-      const q = document.getElementById('prodSearch').value.toLowerCase();
-      const agg = aggregate();
-      const filtered = agg.products.filter(p => p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q));
-      renderTopProducts(filtered);
-    });
-
-    // Store ranking
-    document.getElementById('rankRevenue').addEventListener('click', ()=>{ const agg = aggregate(); renderStores(agg.stores.sort((a,b)=>b.revenue-a.revenue)); });
-    document.getElementById('rankNps').addEventListener('click', ()=>{ const agg = aggregate(); renderStores(agg.stores.sort((a,b)=>b.nps-a.nps)); });
-
-    // Export buttons
-    document.getElementById('exportTop').addEventListener('click', ()=>{ downloadCSV('top_products.csv', toRowsFromTable('topProducts')); });
-    document.getElementById('exportBtn').addEventListener('click', ()=>{ const what = document.getElementById('exportWhat').value; downloadCSV(`${what}.csv`, toRowsFromTable(what)); });
-
-    // Run elasticity
-    document.getElementById('runElas').addEventListener('click', ()=>{
-      const p = parseFloat(document.getElementById('elasPrice').value);
-      const E = parseFloat(document.getElementById('elasE').value);
-      const pct = E * 1; // 1 dollar change baseline
-      document.getElementById('elasResult').textContent = `Expected demand change for $1 price change at $${p.toFixed(2)} with E=${E.toFixed(1)} → ${pct.toFixed(1)}%`;
-    });
-
-    // Competitor sync
-    document.getElementById('syncCompetitors').addEventListener('click', ()=>{
-      renderCompetitors();
-      showModal('Competitor Sync', '<div class="muted" style="font-size:12px">Competitor prices refreshed from local dataset.</div>');
-    });
-
-    // Reorder PO
-    document.getElementById('reorderBtn').addEventListener('click', ()=>{
-      const items = lowStockData.map(s=>`<tr><td>${s.name}</td><td>${s.sku}</td><td class=right>${s.onhand}</td></tr>`).join('');
-      showModal('Reorder Purchase Order', `<table><thead><tr><th>Product</th><th>SKU</th><th class=right>On Hand</th></tr></thead><tbody>${items}</tbody></table>
-        <div class=controls style='margin-top:10px'><button class='btn btn-primary' id='submitPO'>Submit PO</button></div>`);
-      document.getElementById('submitPO').addEventListener('click', ()=>{ modal.close(); alert('PO submitted (demo)'); });
-    });
-
-    // Refresh demo
-    document.getElementById('refreshBtn').addEventListener('click', ()=>{ hydrate(); });
-
-    // Report
-    document.getElementById('newReportBtn').addEventListener('click', ()=>{
-      const agg = aggregate();
-      const body = `
-        <div style="display:grid; gap:8px; font-size:14px">
-          <div><b>Revenue (range)</b>: ${money(agg.totalRev)}</div>
-          <div><b>Units</b>: ${fmt.format(agg.totalUnits)}</div>
-          <div><b>AOV</b>: ${money(agg.aov)}</div>
-          <div><b>Gross Margin</b>: ${(agg.gm*100).toFixed(1)}%</div>
-        </div>`;
-      showModal('Generated Summary', body);
-    });
-
-    // Sorting for top products (click headers)
-    document.querySelectorAll('#topProducts thead th').forEach((th, idx)=>{
-      th.style.cursor = 'pointer';
-      th.addEventListener('click', ()=>{
-        const tb = document.querySelector('#topProducts tbody');
-        const rows = Array.from(tb.querySelectorAll('tr'));
-        const asNumber = idx>=3;
-        rows.sort((a,b)=>{
-          const va = a.children[idx].dataset.sort ?? a.children[idx].textContent.trim();
-          const vb = b.children[idx].dataset.sort ?? b.children[idx].textContent.trim();
-          const na = asNumber ? parseFloat(va.replace(/[^0-9.-]/g,'')) : va.toLowerCase();
-          const nb = asNumber ? parseFloat(vb.replace(/[^0-9.-]/g,'')) : vb.toLowerCase();
-          return (na>nb?-1:na<nb?1:0); // desc
-        });
-        rows.forEach(r=> tb.appendChild(r));
-      });
-    });
-
-    // ---------- INIT ----------
-    function hydrate(){
-      const agg = aggregate();
-      renderKpis(agg);
-      renderTrend(agg);
-      renderCategories(agg);
-      renderChannel(agg);
-      renderHeatmap();
-      renderAB();
-      renderSegments();
-      renderTopProducts(agg.products);
-      renderStores(agg.stores);
-      renderLowStock();
-      renderCompetitors();
-      renderBundles();
-      renderPromos();
-      renderCohorts();
-      renderAlerts();
-    }
-
-    function init(){
-      setDatesDefault();
-      hydrate();
-    }
-
-    init();
-  </script>
 </body>
 </html>
-
