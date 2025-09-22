@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -7,127 +7,79 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath fill='%238256ff' d='M128 16a112 112 0 1 0 0 224a112 112 0 0 0 0-224m0 32a80 80 0 1 1 0 160a80 80 0 0 1 0-160'/%3E%3Cpath fill='%23000' d='M80 128c0-26.51 21.49-48 48-48s48 21.49 48 48s-21.49 48-48 48s-48-21.49-48-48m24 0a24 24 0 1 0 48 0a24 24 0 0 0-48 0'/%3E%3C/svg%3E" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <style>
     :root {
-      --bg: #0b0c10;
-      --panel: #111218;
-      --panel-2: #151725;
-      --text: #e7e9ee;
-      --muted: #a3a7b3;
-      --brand: #8256ff;
-      --brand-2: #4d2fff;
-      --ok: #22c55e;
-      --warn: #f59e0b;
-      --err: #ef4444;
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
-    }
-    :root[data-theme="light"] {
-      --bg: #f6f7fb;
-      --panel: #ffffff;
-      --panel-2: #f2f4f8;
-      --text: #0f172a;
-      --muted: #475569;
-      --brand: #6d28d9;
-      --brand-2: #5b21b6;
-      --shadow: 0 10px 25px rgba(2,6,23,.08);
+      --bg: #ffffff;         /* White background */
+      --panel: #ffffff;      /* Card background */
+      --panel-2: #f6f7fb;    /* Page background */
+      --text: #0f172a;       /* Black-ish text */
+      --muted: #475569;      /* Muted text */
+      --brand: #111827;      /* Neutral brand tone */
+      --brand-2: #0b0f1a;    
+      --ok: #16a34a;         /* Green */
+      --warn: #b45309;       /* Amber */
+      --err: #dc2626;        /* Red */
+      --shadow: 0 10px 25px rgba(2,6,23,.06);
+      --ring: rgba(17,24,39,.08);
     }
 
     * { box-sizing: border-box; }
     html, body { height: 100%; }
-    body {
-      margin: 0; background: var(--bg); color: var(--text);
-      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      line-height: 1.35;
-    }
+    body { margin: 0; background: var(--panel-2); color: var(--text); font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; line-height: 1.35; }
 
     /* Layout */
-    .app {
-      display: grid;
-      grid-template-columns: 280px 1fr;
-      grid-template-rows: 64px 1fr;
-      grid-template-areas:
-        "sidebar topbar"
-        "sidebar main";
-      height: 100vh;
-      overflow: hidden;
-    }
-    .topbar {
-      grid-area: topbar; display: flex; align-items: center; gap: 12px;
-      background: var(--panel); padding: 0 16px; border-bottom: 1px solid rgba(148,163,184,.15);
-      position: sticky; top: 0; z-index: 50;
-    }
-    .sidebar {
-      grid-area: sidebar; background: var(--panel); border-right: 1px solid rgba(148,163,184,.15);
-      display: flex; flex-direction: column; padding: 16px; gap: 12px;
-    }
-    .main {
-      grid-area: main; overflow: auto; padding: 20px; background: var(--panel-2);
-    }
+    .app { display: grid; grid-template-columns: 280px 1fr; grid-template-rows: 64px 1fr; grid-template-areas: "sidebar topbar" "sidebar main"; height: 100vh; overflow: hidden; }
+    .topbar { grid-area: topbar; display: flex; align-items: center; gap: 12px; background: var(--panel); padding: 0 16px; border-bottom: 1px solid rgba(2,6,23,.06); position: sticky; top: 0; z-index: 50; }
+    .sidebar { grid-area: sidebar; background: var(--panel); border-right: 1px solid rgba(2,6,23,.06); display: flex; flex-direction: column; padding: 16px; gap: 12px; }
+    .main { grid-area: main; overflow: auto; padding: 20px; background: var(--panel-2); }
 
     /* Sidebar */
-    .brand {
-      display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px;
-      background: linear-gradient(145deg, rgba(130,86,255,.15), transparent);
-    }
-    .brand .logo {
-      width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px;
-      background: linear-gradient(135deg, var(--brand), var(--brand-2)); box-shadow: var(--shadow);
-      color: white; font-weight: 800; letter-spacing: .5px;
-    }
-    .search {
-      display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 10px;
-      background: var(--panel-2); border: 1px solid rgba(148,163,184,.15);
-    }
+    .brand { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; border: 1px solid rgba(2,6,23,.06); background: #fff; }
+    .brand .logo { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 8px; background: #111827; color: #fff; font-weight: 800; letter-spacing: .5px; }
+    .search { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 10px; background: #fff; border: 1px solid rgba(2,6,23,.08); box-shadow: 0 1px 0 #fff, 0 0 0 4px transparent; }
+    .search:focus-within { box-shadow: 0 1px 0 #fff, 0 0 0 4px var(--ring); }
     .search input { flex: 1; background: transparent; border: 0; outline: none; color: var(--text); font-size: 14px; }
     .side-section h5 { margin: 16px 8px 8px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .08em; font-size: 11px; }
     .navlist { display: grid; gap: 6px; }
-    .navitem { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; cursor: pointer; color: var(--text);
-      border: 1px solid transparent;
-    }
-    .navitem.active, .navitem:hover { background: var(--panel-2); border-color: rgba(148,163,184,.15); }
+    .navitem { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; cursor: pointer; color: var(--text); border: 1px solid rgba(2,6,23,.06); background: #fff; }
+    .navitem.active, .navitem:hover { outline: 3px solid var(--ring); }
     .muted { color: var(--muted); }
-
     .footer { margin-top: auto; font-size: 12px; color: var(--muted); display:flex; gap:10px; align-items:center; }
-    .chip { font-size: 11px; padding: 4px 8px; border-radius: 999px; background: rgba(130,86,255,.15); color: var(--brand); border: 1px solid rgba(130,86,255,.35); }
+    .chip { font-size: 11px; padding: 4px 8px; border-radius: 999px; background: #f1f5f9; color: #111827; border: 1px solid rgba(2,6,23,.06); }
 
     /* Topbar */
-    .topbar .btn { padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(148,163,184,.2); background: var(--panel-2); color: var(--text); cursor: pointer; }
-    .topbar .btn:hover { filter: brightness(1.05); }
+    .topbar .btn { padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(2,6,23,.08); background: #fff; color: var(--text); cursor: pointer; box-shadow: var(--shadow); }
+    .topbar .btn:hover { filter: brightness(1.02); }
+    .btn.btn-primary { background: #111827; color: #fff; }
     .spacer { flex: 1; }
 
     /* Cards & grids */
     .grid { display: grid; gap: 16px; }
     .grid.kpis { grid-template-columns: repeat(4, minmax(220px, 1fr)); }
-    .grid.two { grid-template-columns: 1.2fr 1fr; }
-    .grid.three { grid-template-columns: 1fr 1fr 1fr; }
+    .grid.two { grid-template-columns: 1.25fr 1fr; }
 
-    .card { background: var(--panel); border: 1px solid rgba(148,163,184,.15); border-radius: 16px; box-shadow: var(--shadow); }
-    .card .head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid rgba(148,163,184,.12); }
+    .card { background: var(--panel); border: 1px solid rgba(2,6,23,.06); border-radius: 16px; box-shadow: var(--shadow); }
+    .card .head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid rgba(2,6,23,.06); }
     .card .body { padding: 16px; }
-    .h1 { font-size: 28px; font-weight: 700; }
-    .h2 { font-size: 22px; font-weight: 700; }
+    .h2 { font-size: 20px; font-weight: 700; }
     .kpi { display: grid; gap: 8px; }
-    .kpi .value { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
+    .kpi .value { font-size: 24px; font-weight: 800; letter-spacing: -.02em; }
     .trend { font-size: 12px; font-weight: 600; }
     .up { color: var(--ok); }
     .down { color: var(--err); }
 
     /* Table */
     table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th, td { padding: 10px 12px; border-bottom: 1px solid rgba(148,163,184,.12); text-align: left; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid rgba(2,6,23,.06); text-align: left; }
     thead th { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
-    tbody tr:hover { background: rgba(148,163,184,.07); }
-    .tag { padding: 4px 8px; border-radius: 999px; font-size: 11px; border: 1px solid rgba(148,163,184,.2); }
+    tbody tr:hover { background: #f8fafc; }
+    .tag { padding: 4px 8px; border-radius: 999px; font-size: 11px; border: 1px solid rgba(2,6,23,.1); background:#f8fafc; }
+    .right { text-align: right; }
 
     /* Controls */
     .controls { display:flex; flex-wrap: wrap; gap: 8px; }
-    .input, select { padding: 10px 12px; border-radius: 10px; border:1px solid rgba(148,163,184,.25); background: var(--panel); color: var(--text); }
-    .btn-primary { background: linear-gradient(135deg, var(--brand), var(--brand-2)); color: white; border: 0; }
-
-    .mini { font-size: 12px; color: var(--muted); }
-    .right { text-align: right; }
+    .input, select { padding: 10px 12px; border-radius: 10px; border:1px solid rgba(2,6,23,.12); background: #fff; color: var(--text); }
 
     /* Responsive */
     @media (max-width: 1200px) { .grid.kpis { grid-template-columns: repeat(2, minmax(200px, 1fr)); } .grid.two { grid-template-columns: 1fr; } }
@@ -146,13 +98,13 @@
         <div class="logo">A</div>
         <div>
           <div style="font-weight:800; letter-spacing:.02em">Aurelo Data</div>
-          <div class="mini">Store Intelligence Dashboard</div>
+          <div class="muted" style="font-size:12px">Store Intelligence Dashboard</div>
         </div>
       </div>
 
       <div class="search">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="muted"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input id="globalSearch" placeholder="Search products, SKUs, orders…" />
+        <input id="globalSearch" placeholder="Search across tables…" />
       </div>
 
       <div class="side-section">
@@ -191,7 +143,7 @@
       </div>
 
       <div class="footer">
-        <span class="chip">v1.0</span>
+        <span class="chip">v1.1</span>
         <span class="muted">© Aurelo Data</span>
       </div>
     </aside>
@@ -201,7 +153,6 @@
       <button class="btn" id="menuBtn">☰</button>
       <div class="h2">Dashboard</div>
       <div class="spacer"></div>
-      <button class="btn" id="themeBtn">Toggle Theme</button>
       <button class="btn" id="refreshBtn">Refresh</button>
       <button class="btn btn-primary" id="newReportBtn">Generate Report</button>
     </header>
@@ -212,31 +163,31 @@
       <section id="overview" class="view">
         <div class="grid kpis">
           <div class="card kpi">
-            <div class="head"><div>Revenue (MTD)</div><div class="tag">All Stores</div></div>
+            <div class="head"><div>Revenue (MTD)</div><div class="tag" id="kpiScope">All Stores</div></div>
             <div class="body">
-              <div class="value" id="kpiRevenue">$1,204,560</div>
-              <div class="trend up">▲ +12.8% vs last month</div>
+              <div class="value" id="kpiRevenue">$—</div>
+              <div class="trend" id="kpiRevenueTrend">—</div>
             </div>
           </div>
           <div class="card kpi">
             <div class="head"><div>Units Sold</div><div class="tag">MTD</div></div>
             <div class="body">
-              <div class="value" id="kpiUnits">48,920</div>
-              <div class="trend up">▲ +5.3% WoW</div>
+              <div class="value" id="kpiUnits">—</div>
+              <div class="trend" id="kpiUnitsTrend">—</div>
             </div>
           </div>
           <div class="card kpi">
             <div class="head"><div>Avg Order Value</div><div class="tag">Blended</div></div>
             <div class="body">
-              <div class="value" id="kpiAOV">$43.12</div>
-              <div class="trend down">▼ −1.2% WoW</div>
+              <div class="value" id="kpiAOV">—</div>
+              <div class="trend" id="kpiAOVTrend">—</div>
             </div>
           </div>
           <div class="card kpi">
             <div class="head"><div>Gross Margin</div><div class="tag">Normalized</div></div>
             <div class="body">
-              <div class="value" id="kpiGM">38.6%</div>
-              <div class="trend up">▲ +0.7 pts</div>
+              <div class="value" id="kpiGM">—</div>
+              <div class="trend" id="kpiGMTrend">—</div>
             </div>
           </div>
         </div>
@@ -246,9 +197,9 @@
             <div class="head"><div class="h2">Revenue Trend</div>
               <div class="controls">
                 <select id="trendSpan">
-                  <option>Last 30 days</option>
-                  <option selected>Last 90 days</option>
-                  <option>YTD</option>
+                  <option value="30">Last 30 days</option>
+                  <option value="90" selected>Last 90 days</option>
+                  <option value="365">YTD</option>
                 </select>
               </div></div>
             <div class="body"><canvas id="revTrend" height="110"></canvas></div>
@@ -273,6 +224,7 @@
                   <tr>
                     <th data-sort="name">Product</th>
                     <th data-sort="sku">SKU</th>
+                    <th>Category</th>
                     <th class="right" data-sort="revenue">Revenue</th>
                     <th class="right" data-sort="units">Units</th>
                     <th class="right" data-sort="margin">Margin %</th>
@@ -283,7 +235,12 @@
             </div>
           </div>
           <div class="card">
-            <div class="head"><div class="h2">Store Performance</div></div>
+            <div class="head"><div class="h2">Store Performance</div>
+              <div class="controls">
+                <button class="btn" id="rankRevenue">Rank by Revenue</button>
+                <button class="btn" id="rankNps">Rank by NPS</button>
+              </div>
+            </div>
             <div class="body">
               <table id="storePerf">
                 <thead>
@@ -312,7 +269,7 @@
           <div class="card">
             <div class="head"><div class="h2">Hourly Heatmap</div></div>
             <div class="body"><canvas id="heatmap" height="120"></canvas>
-              <div class="mini">Tip: peak traffic 12–2pm local.</div>
+              <div class="muted" style="font-size:12px">Peak traffic 12–2pm local.</div>
             </div>
           </div>
         </div>
@@ -322,7 +279,7 @@
       <section id="inventory" class="view" hidden>
         <div class="grid two">
           <div class="card">
-            <div class="head"><div class="h2">Low Stock Alerts</div><button class="btn" id="reorderBtn">Create Reorder PO</button></div>
+            <div class="head"><div class="h2">Low Stock Alerts</div><button class="btn btn-primary" id="reorderBtn">Create Reorder PO</button></div>
             <div class="body">
               <table id="lowStock">
                 <thead>
@@ -382,11 +339,11 @@
             <div class="head"><div class="h2">Elasticity Sandbox</div></div>
             <div class="body">
               <div class="controls" style="margin-bottom:10px">
-                <label class="mini">Price ($): <input id="elasPrice" class="input" type="number" value="20" min="1" step="0.5" style="width:120px"></label>
-                <label class="mini">Elasticity (E): <input id="elasE" class="input" type="number" value="-1.4" step="0.1" style="width:120px"></label>
+                <label style="font-size:12px">Price ($): <input id="elasPrice" class="input" type="number" value="20" min="1" step="0.5" style="width:120px"></label>
+                <label style="font-size:12px">Elasticity (E): <input id="elasE" class="input" type="number" value="-1.4" step="0.1" style="width:120px"></label>
                 <button class="btn" id="runElas">Run</button>
               </div>
-              <div id="elasResult" class="mini">Expected demand change: —</div>
+              <div id="elasResult" class="muted" style="font-size:12px">Expected demand change: —</div>
             </div>
           </div>
         </div>
@@ -448,17 +405,17 @@
           <div class="head"><div class="h2">Export Center</div></div>
           <div class="body">
             <div class="controls" style="margin-bottom:12px">
-              <select id="exportWhat"><option value="topProducts">Top Products</option><option value="storePerf">Store Performance</option><option value="lowStock">Low Stock</option><option value="competitorPricing">Competitor Pricing</option></select>
+              <select id="exportWhat"><option value="topProducts">Top Products</option><option value="storePerf">Store Performance</option><option value="lowStock">Low Stock</option><option value="competitorPricing">Competitor Pricing</option><option value="alerts">Alerts</option></select>
               <button class="btn btn-primary" id="exportBtn">Export CSV</button>
             </div>
-            <div class="mini">Exports are generated locally from current on‑screen data.</div>
+            <div class="muted" style="font-size:12px">Exports are generated from current on‑screen data and reflect active filters.</div>
           </div>
         </div>
       </section>
     </main>
   </div>
 
-  <!-- Simple Modal for Report / PO -->
+  <!-- Modal -->
   <dialog id="modal" style="border:0; border-radius:16px; padding:0; width:min(720px, 92vw); background: var(--panel); color: var(--text); box-shadow: var(--shadow);">
     <div class="card" style="margin:0; border:0; box-shadow:none">
       <div class="head"><div class="h2" id="modalTitle">Report</div><button class="btn" id="modalClose">Close</button></div>
@@ -467,102 +424,239 @@
   </dialog>
 
   <script>
-    // ---------- THEME ----------
-    const root = document.documentElement;
-    const themeBtn = document.getElementById('themeBtn');
-    function setTheme(mode){ root.setAttribute('data-theme', mode); localStorage.setItem('aurelo-theme', mode); }
-    setTheme(localStorage.getItem('aurelo-theme') || 'dark');
-    themeBtn.addEventListener('click', ()=> setTheme(root.getAttribute('data-theme')==='dark'?'light':'dark'));
-
-    // ---------- SIDEBAR TOGGLE ----------
-    const sidebar = document.getElementById('sidebar');
-    const menuBtn = document.getElementById('menuBtn');
-    menuBtn.addEventListener('click', ()=> sidebar.classList.toggle('open'));
-
-    // ---------- SIMPLE ROUTER ----------
-    const navlist = document.getElementById('navlist');
-    navlist.addEventListener('click', (e)=>{
-      const item = e.target.closest('.navitem'); if(!item) return;
-      document.querySelectorAll('.view').forEach(v=> v.hidden = true);
-      document.querySelector(item.dataset.target).hidden = false;
-      document.querySelectorAll('.navitem').forEach(n=> n.classList.remove('active'));
-      item.classList.add('active');
-      if (window.innerWidth < 900) sidebar.classList.remove('open');
-    });
-
-    // ---------- UTILITIES ----------
-    const fmt = new Intl.NumberFormat(undefined, {maximumFractionDigits: 2});
-    const money = v => new Intl.NumberFormat(undefined,{style:'currency',currency:'USD'}).format(v);
-
-    function downloadCSV(filename, rows){
-      const process = v => (v==null?'':String(v).replace(/"/g,'""'));
-      const csv = rows.map(r => r.map(c=>`"${process(c)}"`).join(',')).join('\n');
-      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-      const url = URL.createObjectURL(blob);
-      const link = Object.assign(document.createElement('a'), {href:url, download: filename});
-      document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url);
-    }
-
-    function sortTable(tbody, idx, dir='asc', asNumber=false){
-      const rows = Array.from(tbody.querySelectorAll('tr'));
-      rows.sort((a,b)=>{
-        const va = a.children[idx].dataset.sort ?? a.children[idx].textContent.trim();
-        const vb = b.children[idx].dataset.sort ?? b.children[idx].textContent.trim();
-        const na = asNumber ? parseFloat(va.replace(/[^0-9.-]/g,'')) : va.toLowerCase();
-        const nb = asNumber ? parseFloat(vb.replace(/[^0-9.-]/g,'')) : vb.toLowerCase();
-        return (na>nb?1:na<nb?-1:0)*(dir==='asc'?1:-1);
-      });
-      rows.forEach(r=> tbody.appendChild(r));
-    }
-
-    // ---------- DEMO DATA ----------
-    const demo = {
-      topProducts: [
-        {name:'Aurelo Energy Drink — Citrus 12oz', sku:'AE‑C12', revenue: 182340, units: 8120, margin: 0.41},
-        {name:'Aurelo Protein Bar — Cocoa 6pk', sku:'AP‑B06', revenue: 143220, units: 10112, margin: 0.36},
-        {name:'Aurelo Sparkling Water — Lime 8pk', sku:'AS‑L08', revenue: 122110, units: 9033, margin: 0.33},
-        {name:'Aurelo Smart Bottle 24oz', sku:'AB‑24', revenue: 117890, units: 2890, margin: 0.48},
-        {name:'Aurelo Electrolyte Mix — Berry 20ct', sku:'AM‑B20', revenue: 98310, units: 4520, margin: 0.39},
-        {name:'Aurelo Creatine 300g', sku:'AC‑300', revenue: 79230, units: 2100, margin: 0.45},
-      ],
-      stores: [
-        {store:'Raleigh 01', region:'East', revenue: 264500, yoy:+8.4, nps:72},
-        {store:'Charlotte 02', region:'East', revenue: 241200, yoy:+6.2, nps:69},
-        {store:'Austin 07', region:'Central', revenue: 223400, yoy:+9.1, nps:75},
-        {store:'San Jose 03', region:'West', revenue: 215600, yoy:+5.6, nps:71},
-      ],
-      lowStock: [
-        {name:'Smart Bottle 24oz', sku:'AB‑24', onhand: 28, days: 3, status:'Critical'},
-        {name:'Protein Bar — Cocoa 6pk', sku:'AP‑B06', onhand: 140, days: 5, status:'Low'},
-        {name:'Electrolyte Mix — Berry 20ct', sku:'AM‑B20', onhand: 80, days: 4, status:'Low'},
-      ],
-      competitorPricing: [
-        {name:'Smart Bottle 24oz', ours: 29.99, comp:'HydraCo', compPrice: 31.49},
-        {name:'Protein Bar — Cocoa 6pk', ours: 9.99, comp:'Snacky', compPrice: 8.49},
-        {name:'Energy Drink — Citrus 12oz', ours: 2.49, comp:'VoltUp', compPrice: 2.79},
-      ],
-      bundles: [
-        {bundle:'Energy Drink + Protein Bar', lift:1.22, support:0.18, uplift: 42000},
-        {bundle:'Smart Bottle + Electrolyte Mix', lift:1.17, support:0.11, uplift: 23000},
-      ],
-      promos: [
-        {date:'2025‑10‑01', campaign:'Fall Fuel Week', channel:'Omni', uplift:'+12%'}
-      ],
-      cohorts: [
-        {c:'Jul‑2025', w1:32, w4:21, w8:16, w12:12},
-        {c:'Aug‑2025', w1:34, w4:22, w8:17, w12:13},
-        {c:'Sep‑2025', w1:33, w4:23, w8:18, w12:—},
-      ]
+    // ---------- STATE & DATA ----------
+    const state = {
+      from: null,
+      to: null,
+      region: 'all',
+      channel: 'all',
+      spanDays: 90
     };
 
-    // ---------- POPULATE TABLES ----------
-    function fillTopProducts(rows){
-      const tb = document.querySelector('#topProducts tbody'); tb.innerHTML='';
+    // Realistic catalog & stores
+    const catalog = [
+      {name:'Aurelo Energy Drink — Citrus 12oz', sku:'AE-C12', cat:'Beverage', margin:0.41},
+      {name:'Aurelo Energy Drink — Berry 12oz', sku:'AE-B12', cat:'Beverage', margin:0.40},
+      {name:'Aurelo Protein Bar — Cocoa 6pk', sku:'AP-B06', cat:'Snacks', margin:0.36},
+      {name:'Aurelo Protein Bar — Peanut 6pk', sku:'AP-P06', cat:'Snacks', margin:0.35},
+      {name:'Aurelo Sparkling Water — Lime 8pk', sku:'AS-L08', cat:'Beverage', margin:0.33},
+      {name:'Aurelo Smart Bottle 24oz', sku:'AB-24', cat:'Accessories', margin:0.48},
+      {name:'Aurelo Electrolyte Mix — Berry 20ct', sku:'AM-B20', cat:'Supplements', margin:0.39},
+      {name:'Aurelo Creatine 300g', sku:'AC-300', cat:'Supplements', margin:0.45}
+    ];
+
+    const stores = [
+      {id:'RDU01', store:'Raleigh 01', region:'East', nps:72},
+      {id:'CLT02', store:'Charlotte 02', region:'East', nps:69},
+      {id:'AUS07', store:'Austin 07', region:'Central', nps:75},
+      {id:'SJC03', store:'San Jose 03', region:'West', nps:71},
+      {id:'SEA05', store:'Seattle 05', region:'West', nps:73},
+      {id:'CHI04', store:'Chicago 04', region:'Central', nps:68}
+    ];
+
+    // Daily sales for last 120 days with channel split
+    const channels = ['In‑Store','Online','Wholesale'];
+    const dailySales = [];
+    (function seedSales(){
+      const today = new Date();
+      for(let i=120; i>=0; i--){
+        const date = new Date(today); date.setDate(today.getDate()-i);
+        stores.forEach(s => {
+          const base = 1200 + (Math.sin(i/9)*120) + (s.region==='East'?60: s.region==='West'?40:50);
+          const instore = Math.max(0, base * (0.55 + Math.sin(i/5)*0.05));
+          const online  = Math.max(0, base * (0.35 + Math.cos(i/7)*0.04));
+          const whole   = Math.max(0, base * 0.10);
+          // units & AOV
+          const units = Math.round((instore+online+whole)/40);
+          const aov = 38 + (Math.sin(i/11)*2);
+          // product splits
+          const prod = Object.fromEntries(catalog.map(p=>[p.sku, Math.max(0, Math.round(units*(0.08+Math.random()*0.12)))]));
+          dailySales.push({date: date.toISOString().slice(0,10), store:s.id, region:s.region, revenue: instore+online+whole, units, aov, channel:{'In‑Store':instore,'Online':online,'Wholesale':whole}, products: prod});
+        });
+      }
+    })();
+
+    // Inventory & external data
+    const lowStockData = [
+      {name:'Smart Bottle 24oz', sku:'AB-24', onhand: 28, days: 3, status:'Critical'},
+      {name:'Protein Bar — Cocoa 6pk', sku:'AP-B06', onhand: 140, days: 5, status:'Low'},
+      {name:'Electrolyte Mix — Berry 20ct', sku:'AM-B20', onhand: 80, days: 4, status:'Low'},
+    ];
+
+    const competitorPricing = [
+      {name:'Smart Bottle 24oz', ours: 29.99, comp:'HydraCo', compPrice: 31.49},
+      {name:'Protein Bar — Cocoa 6pk', ours: 9.99, comp:'Snacky', compPrice: 8.49},
+      {name:'Energy Drink — Citrus 12oz', ours: 2.49, comp:'VoltUp', compPrice: 2.79},
+      {name:'Sparkling Water — Lime 8pk', ours: 5.49, comp:'Fizz+Lime', compPrice: 5.19}
+    ];
+
+    const bundles = [
+      {bundle:'Energy Drink + Protein Bar', lift:1.22, support:0.18, uplift: 42000},
+      {bundle:'Smart Bottle + Electrolyte Mix', lift:1.17, support:0.11, uplift: 23000},
+      {bundle:'Creatine + Smart Bottle', lift:1.09, support:0.07, uplift: 9000}
+    ];
+
+    const promos = [
+      {date:'2025-09-25', campaign:'End‑of‑Quarter Boost', channel:'Omni', uplift:'+9%'},
+      {date:'2025-10-01', campaign:'Fall Fuel Week', channel:'Omni', uplift:'+12%'}
+    ];
+
+    const alertsData = [
+      {time:'09:14', type:'Stock', msg:'AB-24 below 30 units at Raleigh 01', status:'Open'},
+      {time:'10:02', type:'POS', msg:'Gateway retry at San Jose 03 (resolved)', status:'Resolved'},
+      {time:'11:35', type:'Chargeback', msg:'Dispute opened for order #81342', status:'Open'}
+    ];
+
+    // ---------- HELPERS ----------
+    const fmt = new Intl.NumberFormat(undefined, {maximumFractionDigits: 0});
+    const money = v => new Intl.NumberFormat(undefined,{style:'currency',currency:'USD'}).format(v);
+    const clampDate = (d) => new Date(d.toISOString().slice(0,10));
+
+    function rangeFilter(row){
+      const d = new Date(row.date);
+      if(state.from && d < state.from) return false;
+      if(state.to && d > state.to) return false;
+      if(state.region !== 'all' && row.region !== state.region) return false;
+      return true;
+    }
+
+    function aggregate(){
+      const rows = dailySales.filter(rangeFilter);
+      const byStore = new Map();
+      let totalRev=0, totalUnits=0, totalOrders=0, revSeries=[];
+      const catAgg = new Map();
+      const chanAgg = {'In‑Store':0,'Online':0,'Wholesale':0};
+
+      // build per-day totals for chart
+      const days = [...new Set(rows.map(r=>r.date))].sort();
+      days.forEach(day=>{
+        const dayRows = rows.filter(r=>r.date===day);
+        const rev = dayRows.reduce((s,r)=>s+r.revenue,0);
+        revSeries.push({date:day, revenue:rev});
+      });
+
       rows.forEach(r=>{
+        totalRev += r.revenue; totalUnits += r.units; totalOrders += Math.max(1, Math.round(r.revenue / r.aov));
+        if(state.channel==='all'){ chanAgg['In‑Store']+=r.channel['In‑Store']; chanAgg['Online']+=r.channel['Online']; chanAgg['Wholesale']+=r.channel['Wholesale']; }
+        else { chanAgg[state.channel]+=r.channel[state.channel]; }
+        const st = stores.find(s=>s.id===r.store);
+        const cur = byStore.get(st.store) || {store:st.store, region:st.region, revenue:0, yoy: 6 + Math.random()*4, nps:st.nps};
+        cur.revenue += r.revenue; byStore.set(st.store, cur);
+        // Products → categories
+        Object.entries(r.products).forEach(([sku, units])=>{
+          const prod = catalog.find(p=>p.sku===sku); if(!prod) return;
+          const rev = units * 4.2 * (prod.cat==='Accessories'?7: prod.cat==='Supplements'?12: 1); // rough revenue weight
+          catAgg.set(prod.cat, (catAgg.get(prod.cat)||0) + rev);
+        });
+      });
+
+      // top products aggregate
+      const prodAgg = new Map();
+      rows.forEach(r=>{
+        Object.entries(r.products).forEach(([sku, units])=>{
+          const prod = catalog.find(p=>p.sku===sku); if(!prod) return;
+          const revenue = units * (prod.cat==='Accessories'?29.99: prod.cat==='Supplements'?24.99: prod.cat==='Snacks'?9.99:2.49);
+          const v = prodAgg.get(sku) || {name:prod.name, sku:sku, cat:prod.cat, units:0, revenue:0, margin:prod.margin};
+          v.units += units; v.revenue += revenue; prodAgg.set(sku, v);
+        });
+      });
+
+      return {
+        totalRev, totalUnits, totalOrders,
+        aov: totalOrders? totalRev/totalOrders : 0,
+        gm: 0.386, // static demo metric
+        revSeries, catAgg: Object.fromEntries(catAgg), chanAgg, stores: [...byStore.values()].sort((a,b)=>b.revenue-a.revenue),
+        products: [...prodAgg.values()].sort((a,b)=>b.revenue-a.revenue).slice(0,20)
+      };
+    }
+
+    function setDatesDefault(){
+      const today = clampDate(new Date());
+      const from = new Date(today); from.setDate(today.getDate()-29);
+      state.from = from; state.to = today; state.spanDays = 90;
+      document.getElementById('toDate').value = today.toISOString().slice(0,10);
+      document.getElementById('fromDate').value = from.toISOString().slice(0,10);
+    }
+
+    // ---------- RENDERERS ----------
+    let revChart, catChart, channelChart, heatChart, abChart, segChart;
+
+    function renderKpis(agg){
+      const prev = {...agg}; // naive previous for trend demo
+      document.getElementById('kpiScope').textContent = state.region==='all' ? 'All Stores' : state.region + ' Region';
+      document.getElementById('kpiRevenue').textContent = money(agg.totalRev);
+      document.getElementById('kpiUnits').textContent = fmt.format(agg.totalUnits);
+      document.getElementById('kpiAOV').textContent = money(agg.aov);
+      document.getElementById('kpiGM').textContent = (agg.gm*100).toFixed(1) + '%';
+      // simple mock trend comparisons
+      const revDelta = (Math.random()*4-2).toFixed(1);
+      const unitsDelta = (Math.random()*4-2).toFixed(1);
+      const aovDelta = (Math.random()*2-1).toFixed(1);
+      const gmDelta = (Math.random()*1-0.5).toFixed(1);
+      setTrend('kpiRevenueTrend', revDelta);
+      setTrend('kpiUnitsTrend', unitsDelta);
+      setTrend('kpiAOVTrend', aovDelta);
+      setTrend('kpiGMTrend', gmDelta, true);
+    }
+
+    function setTrend(id, delta, pts=false){
+      const el = document.getElementById(id);
+      const up = parseFloat(delta) >= 0; el.className = 'trend ' + (up? 'up':'down');
+      el.textContent = (up?'▲ ':'▼ ') + delta + (pts? ' pts':'') + ' vs prior';
+    }
+
+    function renderTrend(agg){
+      const ctx = document.getElementById('revTrend');
+      revChart?.destroy();
+      const labels = agg.revSeries.map(r=>r.date);
+      const data = agg.revSeries.map(r=>Math.round(r.revenue));
+      revChart = new Chart(ctx,{ type:'line', data:{ labels, datasets:[{ label:'Revenue', data, tension:.35, fill:true }]}, options:{ plugins:{legend:{display:false}}, scales:{ y:{ grid:{ color:'rgba(2,6,23,.08)'}}, x:{ grid:{ display:false}}}}});
+    }
+
+    function renderCategories(agg){
+      const ctx = document.getElementById('catBar');
+      catChart?.destroy();
+      const labels = Object.keys(agg.catAgg);
+      const data = Object.values(agg.catAgg).map(v=>Math.round(v));
+      catChart = new Chart(ctx,{ type:'bar', data:{ labels, datasets:[{ label:'Sales', data }]}, options:{ plugins:{legend:{display:false}}, scales:{ y:{ grid:{ color:'rgba(2,6,23,.08)'}}, x:{ grid:{ display:false}}}}});
+    }
+
+    function renderChannel(agg){
+      const ctx = document.getElementById('channelPie');
+      channelChart?.destroy();
+      const labels = Object.keys(agg.chanAgg);
+      const data = Object.values(agg.chanAgg).map(v=>Math.round(v));
+      channelChart = new Chart(ctx,{ type:'doughnut', data:{ labels, datasets:[{ data }]}, options:{ plugins:{legend:{position:'bottom'}}});
+    }
+
+    function renderHeatmap(){
+      const ctx = document.getElementById('heatmap');
+      heatChart?.destroy();
+      const hours = ['9a','10a','11a','12p','1p','2p','3p','4p','5p'];
+      const base = [10,12,18,26,28,24,20,18,14];
+      heatChart = new Chart(ctx,{ type:'bar', data:{ labels: hours, datasets:[{label:'Traffic', data: base}]}, options:{ plugins:{legend:{display:false}}, scales:{ y:{ display:false, grid:{display:false}}, x:{ grid:{display:false}}}}});
+    }
+
+    function renderAB(){
+      const ctx = document.getElementById('abLine');
+      abChart?.destroy();
+      abChart = new Chart(ctx,{ type:'line', data:{ labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], datasets:[{label:'Price A', data:[100,104,99,110,120,140,138]}, {label:'Price B', data:[98,96,101,105,112,125,130]}]}, options:{ plugins:{legend:{position:'bottom'}}, scales:{ y:{ grid:{ color:'rgba(2,6,23,.08)'}}, x:{ grid:{ display:false}}}}});
+    }
+
+    function renderSegments(){
+      const ctx = document.getElementById('segmentDonut');
+      segChart?.destroy();
+      segChart = new Chart(ctx,{ type:'doughnut', data:{ labels:['Loyal','Occasional','New'], datasets:[{ data:[44,38,18]}]}, options:{ plugins:{legend:{position:'bottom'}}});
+    }
+
+    function renderTopProducts(list){
+      const tb = document.querySelector('#topProducts tbody'); tb.innerHTML='';
+      list.forEach(r=>{
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${r.name}</td>
           <td class="muted">${r.sku}</td>
+          <td>${r.cat}</td>
           <td class="right" data-sort="${r.revenue}">${money(r.revenue)}</td>
           <td class="right" data-sort="${r.units}">${fmt.format(r.units)}</td>
           <td class="right" data-sort="${r.margin}">${(r.margin*100).toFixed(1)}%</td>`;
@@ -570,11 +664,11 @@
       });
     }
 
-    function fillStorePerf(){
+    function renderStores(list){
       const tb = document.querySelector('#storePerf tbody'); tb.innerHTML='';
-      demo.stores.forEach(s=>{
-        const tr = document.createElement('tr');
+      list.forEach(s=>{
         const yoyClass = s.yoy>=0? 'up' : 'down';
+        const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${s.store}</td>
           <td><span class="tag">${s.region}</span></td>
@@ -585,9 +679,9 @@
       });
     }
 
-    function fillLowStock(){
+    function renderLowStock(){
       const tb = document.querySelector('#lowStock tbody'); tb.innerHTML='';
-      demo.lowStock.forEach(s=>{
+      lowStockData.forEach(s=>{
         const color = s.status==='Critical'? 'var(--err)' : 'var(--warn)';
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -600,9 +694,9 @@
       });
     }
 
-    function fillCompetitor(){
+    function renderCompetitors(){
       const tb = document.querySelector('#competitorPricing tbody'); tb.innerHTML='';
-      demo.competitorPricing.forEach(r=>{
+      competitorPricing.forEach(r=>{
         const delta = r.ours - r.compPrice;
         const cls = delta<=0? 'up':'down';
         const sign = delta>0? '+':'';
@@ -617,95 +711,47 @@
       });
     }
 
-    function fillBundles(){
+    function renderBundles(){
       const tb = document.querySelector('#bundles tbody'); tb.innerHTML='';
-      demo.bundles.forEach(b=>{
+      bundles.forEach(b=>{
         const tr = document.createElement('tr');
         tr.innerHTML = `<td>${b.bundle}</td><td>${b.lift.toFixed(2)}×</td><td>${(b.support*100).toFixed(1)}%</td><td class="right">${money(b.uplift)}</td>`;
         tb.appendChild(tr);
       });
     }
 
-    function fillPromos(){
+    function renderPromos(){
       const tb = document.querySelector('#promos tbody'); tb.innerHTML='';
-      demo.promos.forEach(p=>{
+      promos.forEach(p=>{
         const tr = document.createElement('tr');
         tr.innerHTML = `<td>${p.date}</td><td>${p.campaign}</td><td>${p.channel}</td><td class="right up">${p.uplift}</td>`;
         tb.appendChild(tr);
       });
     }
 
-    function fillCohorts(){
+    function renderCohorts(){
       const tb = document.querySelector('#cohorts tbody'); tb.innerHTML='';
-      demo.cohorts.forEach(c=>{
+      const cohorts = [
+        {c:'Jul‑2025', w1:32, w4:21, w8:16, w12:12},
+        {c:'Aug‑2025', w1:34, w4:22, w8:17, w12:13},
+        {c:'Sep‑2025', w1:33, w4:23, w8:18, w12:'—'},
+      ];
+      cohorts.forEach(c=>{
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${c.c}</td><td class="right">${c.w1}%</td><td class="right">${c.w4}%</td><td class="right">${c.w8}%</td><td class="right">${c.w12 ?? '—'}%</td>`;
+        tr.innerHTML = `<td>${c.c}</td><td class="right">${c.w1}%</td><td class="right">${c.w4}%</td><td class="right">${c.w8}%</td><td class="right">${c.w12}%</td>`;
         tb.appendChild(tr);
       });
     }
 
-    // ---------- CHARTS ----------
-    let revChart, catChart, channelChart, heatChart, abChart, segChart;
-
-    function makeCharts(){
-      const ctx1 = document.getElementById('revTrend');
-      const labels = Array.from({length: 13}, (_,i)=>`W${i+1}`);
-      const data1 = [42,45,48,40,52,55,58,62,61,66,70,74,78];
-      revChart?.destroy();
-      revChart = new Chart(ctx1,{ type:'line', data:{ labels, datasets:[{ label:'Revenue', data:data1, tension:.35, fill:true, borderColor:getComputedStyle(root).getPropertyValue('--brand').trim(), backgroundColor:getComputedStyle(root).getPropertyValue('--brand').trim()+"26" }]}, options:{ plugins:{legend:{display:false}}, scales:{ y:{ grid:{ color:'rgba(148,163,184,.15)'}}, x:{ grid:{ display:false}}}}});
-
-      const ctx2 = document.getElementById('catBar');
-      catChart?.destroy();
-      catChart = new Chart(ctx2,{ type:'bar', data:{ labels:['Beverage','Snacks','Accessories','Supplements'], datasets:[{ label:'Sales', data:[520,430,280,390]}]}, options:{ plugins:{legend:{display:false}}, scales:{ y:{ grid:{ color:'rgba(148,163,184,.15)'}}, x:{ grid:{ display:false}}}}});
-
-      const ctx3 = document.getElementById('channelPie');
-      channelChart?.destroy();
-      channelChart = new Chart(ctx3,{ type:'doughnut', data:{ labels:['In‑Store','Online','Wholesale'], datasets:[{ data:[58,34,8]}]}, options:{ plugins:{legend:{position:'bottom'}}});
-
-      const ctx4 = document.getElementById('heatmap');
-      heatChart?.destroy();
-      // Fake heatmap: use stacked bars to mimic intensity
-      const hours = ['9a','10a','11a','12p','1p','2p','3p','4p','5p'];
-      const base = [10,12,18,26,28,24,20,18,14];
-      heatChart = new Chart(ctx4,{ type:'bar', data:{ labels: hours, datasets:[{label:'Traffic', data: base}]}, options:{ plugins:{legend:{display:false}}, scales:{ y:{ display:false, grid:{display:false}}, x:{ grid:{display:false}}}}});
-
-      const ctx5 = document.getElementById('abLine');
-      abChart?.destroy();
-      abChart = new Chart(ctx5,{ type:'line', data:{ labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], datasets:[{label:'Price A', data:[100,104,99,110,120,140,138]}, {label:'Price B', data:[98,96,101,105,112,125,130]}]}, options:{ plugins:{legend:{position:'bottom'}}, scales:{ y:{ grid:{ color:'rgba(148,163,184,.15)'}}, x:{ grid:{ display:false}}}}});
-
-      const ctx6 = document.getElementById('segmentDonut');
-      segChart?.destroy();
-      segChart = new Chart(ctx6,{ type:'doughnut', data:{ labels:['Loyal','Occasional','New'], datasets:[{ data:[44,38,18]}]}, options:{ plugins:{legend:{position:'bottom'}}});
-    }
-
-    // ---------- FILTERS ----------
-    document.getElementById('applyFilters').addEventListener('click', ()=>{
-      const region = document.getElementById('regionSelect').value;
-      const channel = document.getElementById('channelSelect').value;
-      const from = document.getElementById('fromDate').value;
-      const to = document.getElementById('toDate').value;
-      // In a real app, fetch with these filters. Here we just show a modal.
-      showModal('Filters Applied', `<div class="mini">Region: <b>${region}</b> — Channel: <b>${channel}</b> — Range: <b>${from||'—'} to ${to||'—'}</b></div>`);
-    });
-
-    // ---------- SEARCH (Top Products) ----------
-    const prodSearch = document.getElementById('prodSearch');
-    prodSearch.addEventListener('input', ()=>{
-      const q = prodSearch.value.toLowerCase();
-      const filtered = demo.topProducts.filter(p => p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q));
-      fillTopProducts(filtered);
-    });
-
-    // Global quick filter for all tables (client‑side demo)
-    document.getElementById('globalSearch').addEventListener('input', (e)=>{
-      const q = e.target.value.toLowerCase();
-      document.querySelectorAll('tbody').forEach(tb =>{
-        tb.querySelectorAll('tr').forEach(tr =>{
-          const show = tr.textContent.toLowerCase().includes(q);
-          tr.style.display = show? '' : 'none';
-        });
+    function renderAlerts(){
+      const tb = document.querySelector('#alerts tbody'); tb.innerHTML='';
+      alertsData.forEach(a=>{
+        const cls = a.status==='Open'? 'down' : 'up';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${a.time}</td><td>${a.type}</td><td>${a.msg}</td><td class="${cls}">${a.status}</td>`;
+        tb.appendChild(tr);
       });
-    });
+    }
 
     // ---------- EXPORTS ----------
     function toRowsFromTable(tableId){
@@ -715,40 +761,15 @@
       return [headers, ...rows];
     }
 
-    document.getElementById('exportTop').addEventListener('click', ()=>{
-      downloadCSV('top_products.csv', toRowsFromTable('topProducts'));
-    });
-
-    document.getElementById('exportBtn').addEventListener('click', ()=>{
-      const what = document.getElementById('exportWhat').value;
-      downloadCSV(`${what}.csv`, toRowsFromTable(what));
-    });
-
-    // ---------- ELASTICITY ----------
-    document.getElementById('runElas').addEventListener('click', ()=>{
-      const p = parseFloat(document.getElementById('elasPrice').value);
-      const E = parseFloat(document.getElementById('elasE').value);
-      const pct = E * (1); // 1 dollar change baseline demo
-      document.getElementById('elasResult').textContent = `Expected demand change for $1 price change at $${p.toFixed(2)} with E=${E.toFixed(1)} → ${pct.toFixed(1)}%`;
-    });
-
-    // ---------- COMPETITOR SYNC ----------
-    document.getElementById('syncCompetitors').addEventListener('click', ()=>{
-      showModal('Competitor Sync', '<div class="mini">Queued competitor price refresh. Expected in ~30s (demo).</div>');
-    });
-
-    // ---------- REORDER PO ----------
-    document.getElementById('reorderBtn').addEventListener('click', ()=>{
-      const items = demo.lowStock.map(s=>`<tr><td>${s.name}</td><td>${s.sku}</td><td class=right>${s.onhand}</td></tr>`).join('');
-      showModal('Reorder Purchase Order', `<table><thead><tr><th>Product</th><th>SKU</th><th class=right>On Hand</th></tr></thead><tbody>${items}</tbody></table>
-        <div class=controls style='margin-top:10px'><button class='btn btn-primary' onclick='alert("PO submitted (demo)")'>Submit PO</button></div>`);
-    });
-
-    // ---------- TABLE SORTING ----------
-    document.querySelectorAll('#topProducts thead th').forEach((th, idx)=>{
-      th.style.cursor = 'pointer';
-      th.addEventListener('click', ()=> sortTable(document.querySelector('#topProducts tbody'), idx, 'desc', idx>=2));
-    });
+    function downloadCSV(filename, rows){
+      const process = v => (v==null?'':String(v).replace(/"/g,'""'));
+      const csv = rows.map(r => r.map(c=>`"${process(c)}"`).join(',')).join('
+');
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const link = Object.assign(document.createElement('a'), {href:url, download: filename});
+      document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url);
+    }
 
     // ---------- MODAL ----------
     const modal = document.getElementById('modal');
@@ -758,37 +779,140 @@
     function showModal(title, html){ modalTitle.textContent = title; modalBody.innerHTML = html; modal.showModal(); }
     modalClose.addEventListener('click', ()=> modal.close());
 
-    // ---------- REFRESH (Demo) ----------
-    document.getElementById('refreshBtn').addEventListener('click', ()=>{
-      // Shuffle a KPI for fun
-      const delta = (Math.random()*4 - 2).toFixed(1);
-      document.getElementById('kpiAOV').textContent = `$${(42 + (Math.random()*2)).toFixed(2)}`;
-      document.getElementById('kpiGM').textContent = `${(38.6 + (Math.random()*1-0.5)).toFixed(1)}%`;
-      const trend = document.querySelector('#overview .kpi:nth-child(3) .trend');
-      trend.className = 'trend ' + (delta>=0?'up':'down');
-      trend.textContent = (delta>=0?'▲ ':'▼ ') + `${delta}% WoW`;
-      makeCharts();
+    // ---------- WIRING ----------
+    // Sidebar toggle
+    document.getElementById('menuBtn').addEventListener('click', ()=> document.getElementById('sidebar').classList.toggle('open'));
+
+    // Router
+    document.getElementById('navlist').addEventListener('click', (e)=>{
+      const item = e.target.closest('.navitem'); if(!item) return;
+      document.querySelectorAll('.view').forEach(v=> v.hidden = true);
+      document.querySelector(item.dataset.target).hidden = false;
+      document.querySelectorAll('.navitem').forEach(n=> n.classList.remove('active'));
+      item.classList.add('active');
+      if (window.innerWidth < 900) document.getElementById('sidebar').classList.remove('open');
+    });
+
+    // Global search filters all visible tables
+    document.getElementById('globalSearch').addEventListener('input', (e)=>{
+      const q = e.target.value.toLowerCase();
+      document.querySelectorAll('section.view:not([hidden]) tbody').forEach(tb =>{
+        tb.querySelectorAll('tr').forEach(tr =>{
+          const show = tr.textContent.toLowerCase().includes(q);
+          tr.style.display = show? '' : 'none';
+        });
+      });
+    });
+
+    // Apply filters
+    document.getElementById('applyFilters').addEventListener('click', ()=>{
+      const region = document.getElementById('regionSelect').value; state.region = region;
+      const channel = document.getElementById('channelSelect').value; state.channel = channel;
+      const from = document.getElementById('fromDate').value; state.from = from? new Date(from) : null;
+      const to = document.getElementById('toDate').value; state.to = to? new Date(to) : null;
+      hydrate();
+      showModal('Filters Applied', `<div class="muted" style="font-size:12px">Region: <b>${region}</b> — Channel: <b>${channel}</b> — Range: <b>${from||'—'} to ${to||'—'}</b></div>`);
+    });
+
+    // Top product search
+    document.getElementById('prodSearch').addEventListener('input', ()=>{
+      const q = document.getElementById('prodSearch').value.toLowerCase();
+      const agg = aggregate();
+      const filtered = agg.products.filter(p => p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q));
+      renderTopProducts(filtered);
+    });
+
+    // Store ranking
+    document.getElementById('rankRevenue').addEventListener('click', ()=>{ const agg = aggregate(); renderStores(agg.stores.sort((a,b)=>b.revenue-a.revenue)); });
+    document.getElementById('rankNps').addEventListener('click', ()=>{ const agg = aggregate(); renderStores(agg.stores.sort((a,b)=>b.nps-a.nps)); });
+
+    // Export buttons
+    document.getElementById('exportTop').addEventListener('click', ()=>{ downloadCSV('top_products.csv', toRowsFromTable('topProducts')); });
+    document.getElementById('exportBtn').addEventListener('click', ()=>{ const what = document.getElementById('exportWhat').value; downloadCSV(`${what}.csv`, toRowsFromTable(what)); });
+
+    // Run elasticity
+    document.getElementById('runElas').addEventListener('click', ()=>{
+      const p = parseFloat(document.getElementById('elasPrice').value);
+      const E = parseFloat(document.getElementById('elasE').value);
+      const pct = E * 1; // 1 dollar change baseline
+      document.getElementById('elasResult').textContent = `Expected demand change for $1 price change at $${p.toFixed(2)} with E=${E.toFixed(1)} → ${pct.toFixed(1)}%`;
+    });
+
+    // Competitor sync
+    document.getElementById('syncCompetitors').addEventListener('click', ()=>{
+      renderCompetitors();
+      showModal('Competitor Sync', '<div class="muted" style="font-size:12px">Competitor prices refreshed from local dataset.</div>');
+    });
+
+    // Reorder PO
+    document.getElementById('reorderBtn').addEventListener('click', ()=>{
+      const items = lowStockData.map(s=>`<tr><td>${s.name}</td><td>${s.sku}</td><td class=right>${s.onhand}</td></tr>`).join('');
+      showModal('Reorder Purchase Order', `<table><thead><tr><th>Product</th><th>SKU</th><th class=right>On Hand</th></tr></thead><tbody>${items}</tbody></table>
+        <div class=controls style='margin-top:10px'><button class='btn btn-primary' id='submitPO'>Submit PO</button></div>`);
+      document.getElementById('submitPO').addEventListener('click', ()=>{ modal.close(); alert('PO submitted (demo)'); });
+    });
+
+    // Refresh demo
+    document.getElementById('refreshBtn').addEventListener('click', ()=>{ hydrate(); });
+
+    // Report
+    document.getElementById('newReportBtn').addEventListener('click', ()=>{
+      const agg = aggregate();
+      const body = `
+        <div style="display:grid; gap:8px; font-size:14px">
+          <div><b>Revenue (range)</b>: ${money(agg.totalRev)}</div>
+          <div><b>Units</b>: ${fmt.format(agg.totalUnits)}</div>
+          <div><b>AOV</b>: ${money(agg.aov)}</div>
+          <div><b>Gross Margin</b>: ${(agg.gm*100).toFixed(1)}%</div>
+        </div>`;
+      showModal('Generated Summary', body);
+    });
+
+    // Sorting for top products (click headers)
+    document.querySelectorAll('#topProducts thead th').forEach((th, idx)=>{
+      th.style.cursor = 'pointer';
+      th.addEventListener('click', ()=>{
+        const tb = document.querySelector('#topProducts tbody');
+        const rows = Array.from(tb.querySelectorAll('tr'));
+        const asNumber = idx>=3;
+        rows.sort((a,b)=>{
+          const va = a.children[idx].dataset.sort ?? a.children[idx].textContent.trim();
+          const vb = b.children[idx].dataset.sort ?? b.children[idx].textContent.trim();
+          const na = asNumber ? parseFloat(va.replace(/[^0-9.-]/g,'')) : va.toLowerCase();
+          const nb = asNumber ? parseFloat(vb.replace(/[^0-9.-]/g,'')) : vb.toLowerCase();
+          return (na>nb?-1:na<nb?1:0); // desc
+        });
+        rows.forEach(r=> tb.appendChild(r));
+      });
     });
 
     // ---------- INIT ----------
-    function init(){
-      // default dates: last 30 days
-      const today = new Date();
-      const from = new Date(today); from.setDate(today.getDate()-30);
-      document.getElementById('toDate').value = today.toISOString().slice(0,10);
-      document.getElementById('fromDate').value = from.toISOString().slice(0,10);
+    function hydrate(){
+      const agg = aggregate();
+      renderKpis(agg);
+      renderTrend(agg);
+      renderCategories(agg);
+      renderChannel(agg);
+      renderHeatmap();
+      renderAB();
+      renderSegments();
+      renderTopProducts(agg.products);
+      renderStores(agg.stores);
+      renderLowStock();
+      renderCompetitors();
+      renderBundles();
+      renderPromos();
+      renderCohorts();
+      renderAlerts();
+    }
 
-      fillTopProducts(demo.topProducts);
-      fillStorePerf();
-      fillLowStock();
-      fillCompetitor();
-      fillBundles();
-      fillPromos();
-      fillCohorts();
-      makeCharts();
+    function init(){
+      setDatesDefault();
+      hydrate();
     }
 
     init();
   </script>
 </body>
 </html>
+
