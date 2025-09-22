@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aurelo Data • Overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<style>
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; background:#fff; color:#111; margin:0}
+  header{display:flex;align-items:center;gap:20px;border-bottom:1px solid #e5e7eb;background:#fff;padding:12px 20px;position:sticky;top:0}
+  nav a{color:#111;text-decoration:none;margin-right:16px;font-weight:600}
+  nav a:hover{text-decoration:underline}
+  .container{max-width:1200px;margin:0 auto;padding:20px}
+  h1{font-size:22px;margin:18px 0}
+  .kpis{display:grid;gap:14px;grid-template-columns:repeat(4,1fr)}
+  .kpi{border:1px solid #e5e7eb;border-radius:10px;padding:14px;background:#fafafa}
+  .kpi h2{font-size:13px;color:#475569;margin:0}
+  .kpi .value{margin-top:6px;font-size:20px;font-weight:700}
+  table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px}
+  th,td{padding:10px;border-bottom:1px solid #f1f5f9;text-align:left}
+  th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#475569}
+  .right{text-align:right}
+  .controls{display:flex;gap:8px;align-items:center}
+  input,select,button{padding:8px 10px;border-radius:8px;border:1px solid #e5e7eb;background:#fff}
+  button.btn-primary{background:#111;color:#fff;border-color:#111}
+  .grid{display:grid;gap:16px;grid-template-columns:1.25fr 1fr}
+  @media(max-width:1000px){.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div style="font-weight:800">Aurelo Data Dashboard</div>
+  <nav>
+    <a href="overview.html">Overview</a>
+    <a href="sales.html">Sales</a>
+    <a href="inventory.html">Inventory</a>
+    <a href="customers.html">Customers</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="recommendations.html">Recommendations</a>
+    <a href="ops.html">Operations</a>
+    <a href="exports.html">Exports</a>
+  </nav>
+</header>
+
+<div class="container">
+  <h1>Overview</h1>
+  <div class="controls" style="margin-bottom:12px">
+    <select id="region">
+      <option value="all">All Regions</option>
+      <option>East</option>
+      <option>Central</option>
+      <option>West</option>
+    </select>
+    <select id="channel">
+      <option value="all">All Channels</option>
+      <option>In-Store</option>
+      <option>Online</option>
+      <option>Wholesale</option>
+    </select>
+    <input type="date" id="from">
+    <input type="date" id="to">
+    <button class="btn-primary" id="apply">Apply</button>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><h2>Revenue (MTD)</h2><div class="value" id="kpiRev">$1,204,560</div></div>
+    <div class="kpi"><h2>Units Sold</h2><div class="value" id="kpiUnits">48,920</div></div>
+    <div class="kpi"><h2>Avg Order Value</h2><div class="value" id="kpiAov">$43.12</div></div>
+    <div class="kpi"><h2>Gross Margin</h2><div class="value" id="kpiGm">38.6%</div></div>
+  </div>
+
+  <div class="grid" style="margin-top:16px">
+    <div>
+      <h1 style="margin-top:0">Revenue Trend</h1>
+      <canvas id="revTrend" height="110"></canvas>
+    </div>
+    <div>
+      <h1 style="margin-top:0">Sales by Category</h1>
+      <canvas id="catBar" height="110"></canvas>
+    </div>
+  </div>
+
+  <h1>Top Products</h1>
+  <div class="controls"><input id="prodSearch" placeholder="Search products or SKUs" /><button id="exportTop">Export CSV</button></div>
+  <table id="topProducts">
+    <thead><tr><th>Product</th><th>SKU</th><th>Category</th><th class="right">Revenue</th><th class="right">Units</th><th class="right">Margin</th></tr></thead>
+    <tbody></tbody>
+  </table>
+
+  <h1>Store Performance</h1>
+  <div class="controls"><button id="rankRevenue">Rank by Revenue</button><button id="rankNps">Rank by NPS</button></div>
+  <table id="storePerf">
+    <thead><tr><th>Store</th><th>Region</th><th class="right">Revenue</th><th class="right">YoY</th><th class="right">NPS</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+// --- Demo data (same seed across pages) ---
+const catalog=[
+ {name:'Aurelo Energy Drink — Citrus 12oz',sku:'AE-C12',cat:'Beverage',margin:0.41},
+ {name:'Aurelo Energy Drink — Berry 12oz',sku:'AE-B12',cat:'Beverage',margin:0.40},
+ {name:'Aurelo Protein Bar — Cocoa 6pk',sku:'AP-B06',cat:'Snacks',margin:0.36},
+ {name:'Aurelo Protein Bar — Peanut 6pk',sku:'AP-P06',cat:'Snacks',margin:0.35},
+ {name:'Aurelo Sparkling Water — Lime 8pk',sku:'AS-L08',cat:'Beverage',margin:0.33},
+ {name:'Aurelo Smart Bottle 24oz',sku:'AB-24',cat:'Accessories',margin:0.48},
+ {name:'Aurelo Electrolyte Mix — Berry 20ct',sku:'AM-B20',cat:'Supplements',margin:0.39},
+ {name:'Aurelo Creatine 300g',sku:'AC-300',cat:'Supplements',margin:0.45}
+];
+const stores=[
+ {id:'RDU01',store:'Raleigh 01',region:'East',nps:72},
+ {id:'CLT02',store:'Charlotte 02',region:'East',nps:69},
+ {id:'AUS07',store:'Austin 07',region:'Central',nps:75},
+ {id:'SJC03',store:'San Jose 03',region:'West',nps:71},
+ {id:'SEA05',store:'Seattle 05',region:'West',nps:73},
+ {id:'CHI04',store:'Chicago 04',region:'Central',nps:68}
+];
+const today=new Date();
+const defaultFrom=new Date(today);defaultFrom.setDate(today.getDate()-29);
+// seed day-level revenue for 90 days
+function seedSeries(days=90){const out=[];for(let i=days;i>=0;i--){const d=new Date(today);d.setDate(today.getDate()-i);out.push({date:d.toISOString().slice(0,10),rev:42000+Math.round(900*i/ days)+Math.round(Math.sin(i/5)*2500)});}return out}
+const revSeries=seedSeries(90);
+const catSales={'Beverage':520000,'Snacks':430000,'Accessories':280000,'Supplements':390000};
+const topProducts=[
+ {name:'Aurelo Energy Drink — Citrus 12oz',sku:'AE-C12',cat:'Beverage',revenue:182340,units:8120,margin:0.41},
+ {name:'Aurelo Protein Bar — Cocoa 6pk',sku:'AP-B06',cat:'Snacks',revenue:143220,units:10112,margin:0.36},
+ {name:'Aurelo Sparkling Water — Lime 8pk',sku:'AS-L08',cat:'Beverage',revenue:122110,units:9033,margin:0.33},
+ {name:'Aurelo Smart Bottle 24oz',sku:'AB-24',cat:'Accessories',revenue:117890,units:2890,margin:0.48},
+ {name:'Aurelo Electrolyte Mix — Berry 20ct',sku:'AM-B20',cat:'Supplements',revenue:98310,units:4520,margin:0.39},
+ {name:'Aurelo Creatine 300g',sku:'AC-300',cat:'Supplements',revenue:79230,units:2100,margin:0.45}
+];
+const storePerf=[
+ {store:'Raleigh 01',region:'East',revenue:264500,yoy:8.4,nps:72},
+ {store:'Charlotte 02',region:'East',revenue:241200,yoy:6.2,nps:69},
+ {store:'Austin 07',region:'Central',revenue:223400,yoy:9.1,nps:75},
+ {store:'San Jose 03',region:'West',revenue:215600,yoy:5.6,nps:71},
+ {store:'Seattle 05',region:'West',revenue:198400,yoy:6.8,nps:73},
+ {store:'Chicago 04',region:'Central',revenue:187900,yoy:4.9,nps:68}
+];
+
+// helpers
+const money=v=>new Intl.NumberFormat(undefined,{style:'currency',currency:'USD'}).format(v);
+const fmt=v=>new Intl.NumberFormat().format(v);
+
+// populate
+const ctx=document.getElementById('revTrend');
+new Chart(ctx,{type:'line',data:{labels:revSeries.map(r=>r.date),datasets:[{label:'Revenue',data:revSeries.map(r=>r.rev),borderColor:'#111',backgroundColor:'rgba(17,17,17,.08)',fill:true,tension:.35}]},options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#eee'}},x:{grid:{display:false}}}}});
+
+const ctx2=document.getElementById('catBar');
+new Chart(ctx2,{type:'bar',data:{labels:Object.keys(catSales),datasets:[{label:'Sales',data:Object.values(catSales)}]},options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#eee'}},x:{grid:{display:false}}}}});
+
+function renderTop(list){const tb=document.querySelector('#topProducts tbody');tb.innerHTML='';list.forEach(r=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${r.name}</td><td>${r.sku}</td><td>${r.cat}</td><td class='right'>${money(r.revenue)}</td><td class='right'>${fmt(r.units)}</td><td class='right'>${(r.margin*100).toFixed(1)}%</td>`;tb.appendChild(tr);});}
+renderTop(topProducts);
+
+document.getElementById('prodSearch').addEventListener('input',e=>{const q=e.target.value.toLowerCase();renderTop(topProducts.filter(p=>p.name.toLowerCase().includes(q)||p.sku.toLowerCase().includes(q)));});
+
+document.getElementById('exportTop').addEventListener('click',()=>{const rows=[[...'Product,SKU,Category,Revenue,Units,Margin'.split(',')],...Array.from(document.querySelectorAll('#topProducts tbody tr')).map(tr=>Array.from(tr.children).map(td=>td.textContent))];const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));const a=Object.assign(document.createElement('a'),{href:url,download:'top_products.csv'});document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);});
+
+function renderStores(list){const tb=document.querySelector('#storePerf tbody');tb.innerHTML='';list.forEach(s=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${s.store}</td><td>${s.region}</td><td class='right'>${money(s.revenue)}</td><td class='right'>${s.yoy>0?'+':''}${s.yoy.toFixed(1)}%</td><td class='right'>${s.nps}</td>`;tb.appendChild(tr);});}
+renderStores(storePerf);
+
+document.getElementById('rankRevenue').addEventListener('click',()=>renderStores([...storePerf].sort((a,b)=>b.revenue-a.revenue)));
+document.getElementById('rankNps').addEventListener('click',()=>renderStores([...storePerf].sort((a,b)=>b.nps-a.nps)));
+
+// filters (demo updates KPIs only)
+const from=document.getElementById('from'), to=document.getElementById('to');
+const todayStr=new Date().toISOString().slice(0,10); const fromStr=new Date(Date.now()-29*86400000).toISOString().slice(0,10);
+from.value=fromStr; to.value=todayStr;
+
+document.getElementById('apply').addEventListener('click',()=>{
+  // simple demo math to alter numbers
+  const region=document.getElementById('region').value; const channel=document.getElementById('channel').value;
+  let factor=1; if(region==='East')factor=1.04; if(region==='West')factor=0.98; if(region==='Central')factor=1.01;
+  if(channel==='Online')factor*=0.92; if(channel==='In-Store')factor*=1.06; if(channel==='Wholesale')factor*=0.75;
+  const baseRev=1204560*factor; const units=48920*factor; const aov=43.12*(1+(Math.random()-.5)/20);
+  document.getElementById('kpiRev').textContent=money(baseRev);
+  document.getElementById('kpiUnits').textContent=fmt(Math.round(units));
+  document.getElementById('kpiAov').textContent=money(aov);
+  document.getElementById('kpiGm').textContent=(38.6+(Math.random()-.5)).toFixed(1)+'%';
+});
+</script>
+</body>
+</html>
+
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aurelo Data • Sales</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<style>
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:#fff;color:#111;margin:0}
+  header{display:flex;align-items:center;gap:20px;border-bottom:1px solid #e5e7eb;background:#fff;padding:12px 20px;position:sticky;top:0}
+  nav a{color:#111;text-decoration:none;margin-right:16px;font-weight:600}
+  nav a:hover{text-decoration:underline}
+  .container{max-width:1200px;margin:0 auto;padding:20px}
+  h1{font-size:22px;margin:18px 0}
+  .grid{display:grid;gap:18px;grid-template-columns:1fr 1fr}
+  @media(max-width:1000px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div style="font-weight:800">Aurelo Data Dashboard</div>
+  <nav>
+    <a href="overview.html">Overview</a>
+    <a href="sales.html">Sales</a>
+    <a href="inventory.html">Inventory</a>
+    <a href="customers.html">Customers</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="recommendations.html">Recommendations</a>
+    <a href="ops.html">Operations</a>
+    <a href="exports.html">Exports</a>
+  </nav>
+</header>
+<div class="container">
+  <h1>Channel Mix</h1>
+  <canvas id="channelPie" height="120"></canvas>
+  <h1>Hourly Traffic</h1>
+  <canvas id="heat" height="110"></canvas>
+</div>
+<script>
+const channel={"In-Store":582000,"Online":341000,"Wholesale":78000};
+const ctx1=document.getElementById('channelPie');
+new Chart(ctx1,{type:'doughnut',data:{labels:Object.keys(channel),datasets:[{data:Object.values(channel)}]},options:{plugins:{legend:{position:'bottom'}}}});
+
+const hours=['9a','10a','11a','12p','1p','2p','3p','4p','5p'];
+const traffic=[120,160,220,340,360,300,240,210,170];
+const ctx2=document.getElementById('heat');
+new Chart(ctx2,{type:'bar',data:{labels:hours,datasets:[{label:'Transactions',data:traffic}]},options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#eee'}},x:{grid:{display:false}}}}});
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aurelo Data • Customers</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<style>
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:#fff;color:#111;margin:0}
+  header{display:flex;align-items:center;gap:20px;border-bottom:1px solid #e5e7eb;background:#fff;padding:12px 20px;position:sticky;top:0}
+  nav a{color:#111;text-decoration:none;margin-right:16px;font-weight:600}
+  nav a:hover{text-decoration:underline}
+  .container{max-width:1100px;margin:0 auto;padding:20px}
+  h1{font-size:22px;margin:18px 0}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:10px;border-bottom:1px solid #f1f5f9;text-align:left}
+  th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#475569}
+  .right{text-align:right}
+</style>
+</head>
+<body>
+<header>
+  <div style="font-weight:800">Aurelo Data Dashboard</div>
+  <nav>
+    <a href="overview.html">Overview</a>
+    <a href="sales.html">Sales</a>
+    <a href="inventory.html">Inventory</a>
+    <a href="customers.html">Customers</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="recommendations.html">Recommendations</a>
+    <a href="ops.html">Operations</a>
+    <a href="exports.html">Exports</a>
+  </nav>
+</header>
+<div class="container">
+  <h1>Customer Segments</h1>
+  <canvas id="seg" height="110"></canvas>
+  <h1>Cohort Retention (90-day)</h1>
+  <table>
+    <thead><tr><th>Cohort</th><th class="right">Week 1</th><th class="right">Week 4</th><th class="right">Week 8</th><th class="right">Week 12</th></tr></thead>
+    <tbody>
+      <tr><td>Jul‑2025</td><td class="right">32%</td><td class="right">21%</td><td class="right">16%</td><td class="right">12%</td></tr>
+      <tr><td>Aug‑2025</td><td class="right">34%</td><td class="right">22%</td><td class="right">17%</td><td class="right">13%</td></tr>
+      <tr><td>Sep‑2025</td><td class="right">33%</td><td class="right">23%</td><td class="right">18%</td><td class="right">—</td></tr>
+    </tbody>
+  </table>
+</div>
+<script>
+const ctx=document.getElementById('seg');
+new Chart(ctx,{type:'doughnut',data:{labels:['Loyal','Occasional','New'],datasets:[{data:[44,38,18]}]},options:{plugins:{legend:{position:'bottom'}}}});
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aurelo Data • Pricing</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:#fff;color:#111;margin:0}
+  header{display:flex;align-items:center;gap:20px;border-bottom:1px solid #e5e7eb;background:#fff;padding:12px 20px;position:sticky;top:0}
+  nav a{color:#111;text-decoration:none;margin-right:16px;font-weight:600}
+  nav a:hover{text-decoration:underline}
+  .container{max-width:1100px;margin:0 auto;padding:20px}
+  h1{font-size:22px;margin:18px 0}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:10px;border-bottom:1px solid #f1f5f9;text-align:left}
+  th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#475569}
+  .right{text-align:right}
+  .controls{display:flex;gap:8px;align-items:center}
+  input,button{padding:8px 10px;border-radius:8px;border:1px solid #e5e7eb;background:#fff}
+  button.btn-primary{background:#111;color:#fff;border-color:#111}
+</style>
+</head>
+<body>
+<header>
+  <div style="font-weight:800">Aurelo Data Dashboard</div>
+  <nav>
+    <a href="overview.html">Overview</a>
+    <a href="sales.html">Sales</a>
+    <a href="inventory.html">Inventory</a>
+    <a href="customers.html">Customers</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="recommendations.html">Recommendations</a>
+    <a href="ops.html">Operations</a>
+    <a href="exports.html">Exports</a>
+  </nav>
+</header>
+<div class="container">
+  <h1>Competitor Pricing</h1>
+  <div class="controls" style="margin-bottom:10px"><button class="btn-primary" id="sync">Sync</button></div>
+  <table id="comp">
+    <thead><tr><th>Product</th><th>Our Price</th><th>Competitor</th><th>Competitor Price</th><th class="right">Delta</th></tr></thead>
+    <tbody></tbody>
+  </table>
+
+  <h1>Elasticity Sandbox</h1>
+  <div class="controls" style="margin-bottom:10px">
+    <label>Price ($): <input id="p" type="number" value="20" step="0.5" style="width:120px"></label>
+    <label>Elasticity (E): <input id="e" type="number" value="-1.4" step="0.1" style="width:120px"></label>
+    <button id="run">Run</button>
+  </div>
+  <div id="out" style="font-size:14px;color:#475569">Expected demand change: —</div>
+</div>
+<script>
+const data=[
+ {name:'Smart Bottle 24oz', ours:29.99, comp:'HydraCo', compPrice:31.49},
+ {name:'Protein Bar — Cocoa 6pk', ours:9.99, comp:'Snacky', compPrice:8.49},
+ {name:'Energy Drink — Citrus 12oz', ours:2.49, comp:'VoltUp', compPrice:2.79},
+ {name:'Sparkling Water — Lime 8pk', ours:5.49, comp:'Fizz+Lime', compPrice:5.19}
+];
+function render(){const tb=document.querySelector('#comp tbody');tb.innerHTML='';data.forEach(r=>{const d=(r.ours-r.compPrice).toFixed(2);const cls=parseFloat(d)<=0?'color:green':'color:#b91c1c';const tr=document.createElement('tr');tr.innerHTML=`<td>${r.name}</td><td>$${r.ours.toFixed(2)}</td><td>${r.comp}</td><td>$${r.compPrice.toFixed(2)}</td><td class='right' style='${cls}'>${parseFloat(d)>0?'+':''}${d}</td>`;tb.appendChild(tr);});}
+render();
+document.getElementById('sync').addEventListener('click',()=>{render();alert('Competitor prices refreshed (demo)');});
+document.getElementById('run').addEventListener('click',()=>{const p=parseFloat(document.getElementById('p').value);const E=parseFloat(document.getElementById('e').value);const pct=E*1;document.getElementById('out').textContent=`Expected demand change for $1 price change at $${p.toFixed(2)} with E=${E.toFixed(1)} → ${pct.toFixed(1)}%`;});
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aurelo Data • Recommendations</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:#fff;color:#111;margin:0}
+  header{display:flex;align-items:center;gap:20px;border-bottom:1px solid #e5e7eb;background:#fff;padding:12px 20px;position:sticky;top:0}
+  nav a{color:#111;text-decoration:none;margin-right:16px;font-weight:600}
+  nav a:hover{text-decoration:underline}
+  .container{max-width:1000px;margin:0 auto;padding:20px}
+  h1{font-size:22px;margin:18px 0}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:10px;border-bottom:1px solid #f1f5f9;text-align:left}
+  th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#475569}
+  .right{text-align:right}
+</style>
+</head>
+<body>
+<header>
+  <div style="font-weight:800">Aurelo Data Dashboard</div>
+  <nav>
+    <a href="overview.html">Overview</a>
+    <a href="sales.html">Sales</a>
+    <a href="inventory.html">Inventory</a>
+    <a href="customers.html">Customers</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="recommendations.html">Recommendations</a>
+    <a href="ops.html">Operations</a>
+    <a href="exports.html">Exports</a>
+  </nav>
+</header>
+<div class="container">
+  <h1>Bundle Recommendations</h1>
+  <table>
+    <thead><tr><th>Bundle</th><th>Lift</th><th>Support</th><th class="right">Est. Uplift</th></tr></thead>
+    <tbody>
+      <tr><td>Energy Drink + Protein Bar</td><td>1.22×</td><td>18.0%</td><td class="right">$42,000</td></tr>
+      <tr><td>Smart Bottle + Electrolyte Mix</td><td>1.17×</td><td>11.0%</td><td class="right">$23,000</td></tr>
+      <tr><td>Creatine + Smart Bottle</td><td>1.09×</td><td>7.0%</td><td class="right">$9,000</td></tr>
+    </tbody>
+  </table>
+
+  <h1>Promo Calendar</h1>
+  <table>
+    <thead><tr><th>Date</th><th>Campaign</th><th>Channel</th><th class="right">Target Uplift</th></tr></thead>
+    <tbody>
+      <tr><td>2025-09-25</td><td>End-of-Quarter Boost</td><td>Omni</td><td class="right">+9%</td></tr>
+      <tr><td>2025-10-01</td><td>Fall Fuel Week</td><td>Omni</td><td class="right">+12%</td></tr>
+    </tbody>
+  </table>
+</div>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aurelo Data • Operations</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:#fff;color:#111;margin:0}
+  header{display:flex;align-items:center;gap:20px;border-bottom:1px solid #e5e7eb;background:#fff;padding:12px 20px;position:sticky;top:0}
+  nav a{color:#111;text-decoration:none;margin-right:16px;font-weight:600}
+  nav a:hover{text-decoration:underline}
+  .container{max-width:1000px;margin:0 auto;padding:20px}
+  h1{font-size:22px;margin:18px 0}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:10px;border-bottom:1px solid #f1f5f9;text-align:left}
+  th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#475569}
+  .right{text-align:right}
+</style>
+</head>
+<body>
+<header>
+  <div style="font-weight:800">Aurelo Data Dashboard</div>
+  <nav>
+    <a href="overview.html">Overview</a>
+    <a href="sales.html">Sales</a>
+    <a href="inventory.html">Inventory</a>
+    <a href="customers.html">Customers</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="recommendations.html">Recommendations</a>
+    <a href="ops.html">Operations</a>
+    <a href="exports.html">Exports</a>
+  </nav>
+</header>
+<div class="container">
+  <h1>Live Alerts</h1>
+  <table>
+    <thead><tr><th>Time</th><th>Type</th><th>Message</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>09:14</td><td>Stock</td><td>AB-24 below 30 units at Raleigh 01</td><td style="color:#b91c1c">Open</td></tr>
+      <tr><td>10:02</td><td>POS</td><td>Gateway retry at San Jose 03 (resolved)</td><td style="color:green">Resolved</td></tr>
+      <tr><td>11:35</td><td>Chargeback</td><td>Dispute opened for order #81342</td><td style="color:#b91c1c">Open</td></tr>
+    </tbody>
+  </table>
+
+  <h1>Ops Checklist</h1>
+  <ul style="line-height:1.9">
+    <li><label><input type="checkbox"/> Reconcile previous day sales</label></li>
+    <li><label><input type="checkbox"/> Verify deposits & chargebacks</label></li>
+    <li><label><input type="checkbox"/> Review low stock SKUs</label></li>
+    <li><label><input type="checkbox"/> Update promo signage</label></li>
+  </ul>
+</div>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aurelo Data • Exports</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:#fff;color:#111;margin:0}
+  header{display:flex;align-items:center;gap:20px;border-bottom:1px solid #e5e7eb;background:#fff;padding:12px 20px;position:sticky;top:0}
+  nav a{color:#111;text-decoration:none;margin-right:16px;font-weight:600}
+  nav a:hover{text-decoration:underline}
+  .container{max-width:900px;margin:0 auto;padding:20px}
+  h1{font-size:22px;margin:18px 0}
+  .controls{display:flex;gap:8px;align-items:center}
+  input,select,button{padding:8px 10px;border-radius:8px;border:1px solid #e5e7eb;background:#fff}
+  button.btn-primary{background:#111;color:#fff;border-color:#111}
+  table{width:100%;border-collapse:collapse;margin-top:14px}
+  th,td{padding:10px;border-bottom:1px solid #f1f5f9;text-align:left}
+  th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#475569}
+</style>
+</head>
+<body>
+<header>
+  <div style="font-weight:800">Aurelo Data Dashboard</div>
+  <nav>
+    <a href="overview.html">Overview</a>
+    <a href="sales.html">Sales</a>
+    <a href="inventory.html">Inventory</a>
+    <a href="customers.html">Customers</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="recommendations.html">Recommendations</a>
+    <a href="ops.html">Operations</a>
+    <a href="exports.html">Exports</a>
+  </nav>
+</header>
+<div class="container">
+  <h1>Export Center</h1>
+  <div class="controls" style="margin-bottom:12px">
+    <select id="what">
+      <option value="top">Top Products</option>
+      <option value="stores">Store Performance</option>
+      <option value="low">Low Stock</option>
+      <option value="comp">Competitor Pricing</option>
+      <option value="alerts">Alerts</option>
+    </select>
+    <button class="btn-primary" id="export">Export CSV</button>
+  </div>
+  <div id="preview"></div>
+</div>
+<script>
+const top=[['Product','SKU','Revenue','Units','Margin'],['Aurelo Energy Drink — Citrus 12oz','AE-C12','$182,340','8,120','41%'],['Aurelo Protein Bar — Cocoa 6pk','AP-B06','$143,220','10,112','36%'],['Aurelo Sparkling Water — Lime 8pk','AS-L08','$122,110','9,033','33%'],['Aurelo Smart Bottle 24oz','AB-24','$117,890','2,890','48%']];
+const stores=[['Store','Region','Revenue','YoY','NPS'],['Raleigh 01','East','$264,500','+8.4%','72'],['Charlotte 02','East','$241,200','+6.2%','69'],['Austin 07','Central','$223,400','+9.1%','75'],['San Jose 03','West','$215,600','+5.6%','71']];
+const low=[['Product','SKU','On Hand','Days Cover','Status'],['Smart Bottle 24oz','AB-24','28','3','Critical'],['Protein Bar — Cocoa 6pk','AP-B06','140','5','Low'],['Electrolyte Mix — Berry 20ct','AM-B20','80','4','Low']];
+const comp=[['Product','Our Price','Competitor','Competitor Price','Delta'],['Smart Bottle 24oz','$29.99','HydraCo','$31.49','-1.50'],['Protein Bar — Cocoa 6pk','$9.99','Snacky','$8.49','+1.50'],['Energy Drink — Citrus 12oz','$2.49','VoltUp','$2.79','-0.30']];
+const alerts=[['Time','Type','Message','Status'],['09:14','Stock','AB-24 below 30 units at Raleigh 01','Open'],['10:02','POS','Gateway retry at San Jose 03 (resolved)','Resolved'],['11:35','Chargeback','Dispute opened for order #81342','Open']];
+
+function drawPreview(rows){const div=document.getElementById('preview');div.innerHTML='';const table=document.createElement('table');const thead=document.createElement('thead');const trh=document.createElement('tr');rows[0].forEach(h=>{const th=document.createElement('th');th.textContent=h;trh.appendChild(th)});thead.appendChild(trh);table.appendChild(thead);const tb=document.createElement('tbody');rows.slice(1).forEach(r=>{const tr=document.createElement('tr');r.forEach(c=>{const td=document.createElement('td');td.textContent=c;tr.appendChild(td)});tb.appendChild(tr)});table.appendChild(tb);div.appendChild(table)}
+
+function getRows(){const v=document.getElementById('what').value;return v==='top'?top:v==='stores'?stores:v==='low'?low:v==='comp'?comp:alerts}
+
+function toCsv(rows){return rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n')}
+
+drawPreview(getRows());
+document.getElementById('what').addEventListener('change',()=>drawPreview(getRows()));
+document.getElementById('export').addEventListener('click',()=>{const csv=toCsv(getRows());const url=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));const a=Object.assign(document.createElement('a'),{href:url,download:`${document.getElementById('what').value}.csv`});document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);});
+</script>
+</body>
+</html>
+
+
